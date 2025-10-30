@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://dm53lbpqop8wf"]
+
+[ext_resource type="PackedScene" uid="uid://cr554xvq7lyqq" path="res://Assets/Assets/TEST/mage.tscn" id="1_rjhkm"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ap2l1"]
+size = Vector3(1.85107, 2.67078, 1)
+
+[node name="Enemy" type="CharacterBody3D"]
+collision_layer = 8
+collision_mask = 0
+
+[node name="Mage" parent="." instance=ExtResource("1_rjhkm")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0319824, 1.35738, 0)
+shape = SubResource("BoxShape3D_ap2l1")

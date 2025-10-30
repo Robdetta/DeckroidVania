@@ -1,0 +1,58 @@
+[gd_scene load_steps=13 format=3 uid="uid://4ctmq18hrcap"]
+
+[ext_resource type="Script" uid="uid://bsj7xh3cudv2g" path="res://Game/Systems/GameController.cs" id="1_efta3"]
+[ext_resource type="PackedScene" uid="uid://bp0s2oy13ebug" path="res://Game/Levels/_Sandbox.tscn" id="2_480f2"]
+[ext_resource type="PackedScene" uid="uid://be16lfjghn0sc" path="res://Game/Levels/Level1.tscn" id="2_uhsoj"]
+[ext_resource type="Script" uid="uid://byp0q3sqpfjnv" path="res://Game/Systems/World2d.cs" id="4_47wjs"]
+[ext_resource type="PackedScene" uid="uid://dc1oie8bdclt" path="res://Game/Entities/Player/Player.tscn" id="5_d6roa"]
+[ext_resource type="PackedScene" uid="uid://5niw6g3lwy74" path="res://Scenes/UI/CardHand.tscn" id="6_60app"]
+[ext_resource type="Script" uid="uid://yyk50cugawqv" path="res://Game/Systems/MarkerManager.cs" id="6_yl6pg"]
+[ext_resource type="Script" uid="uid://1bf51gfmx3hk" path="res://Game/Entities/Enemies/EnemySpawner.cs" id="7_73xiu"]
+[ext_resource type="PackedScene" uid="uid://crqqgm7xw7g08" path="res://Scenes/Menu/Start/StartMenu.tscn" id="7_fbcmr"]
+[ext_resource type="Script" uid="uid://csnacf75rplt2" path="res://Game/Systems/UIManager.cs" id="7_olgu0"]
+[ext_resource type="PackedScene" uid="uid://bo7isj7ncgdpa" path="res://Scenes/Menu/Pause/PauseMenu.tscn" id="8_jpl12"]
+[ext_resource type="PackedScene" uid="uid://4lwc62aqullf" path="res://Scenes/GamePlayHUD.tscn" id="8_n31oc"]
+
+[node name="GameController" type="Node" node_paths=PackedStringArray("World3D", "World2D", "UIManager")]
+script = ExtResource("1_efta3")
+World3D = NodePath("World3D")
+World2D = NodePath("World2D")
+Levels = Array[PackedScene]([ExtResource("2_uhsoj"), ExtResource("2_480f2")])
+UIManager = NodePath("GUI")
+
+[node name="World3D" type="Node3D" parent="."]
+
+[node name="World2D" type="Node3D" parent="." node_paths=PackedStringArray("MarkerManager", "EnemySpawner")]
+script = ExtResource("4_47wjs")
+PlayerScene = ExtResource("5_d6roa")
+MarkerManager = NodePath("MarkerManager")
+EnemySpawner = NodePath("EnemySpawner")
+
+[node name="MarkerManager" type="Node" parent="World2D"]
+script = ExtResource("6_yl6pg")
+
+[node name="EnemySpawner" type="Node" parent="World2D"]
+script = ExtResource("7_73xiu")
+
+[node name="GUI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("7_olgu0")
+StartMenuScene = ExtResource("7_fbcmr")
+PauseMenuScene = ExtResource("8_jpl12")
+CardHandScene = ExtResource("6_60app")
+GameplayHUDScene = ExtResource("8_n31oc")
+
+[node name="Button" type="Button" parent="GUI"]
+layout_mode = 0
+offset_left = 65.0
+offset_top = 67.0
+offset_right = 176.0
+offset_bottom = 98.0
+scale = Vector2(1.20579, 1.47717)
+focus_mode = 0
+text = "Change Level"
+
+[connection signal="pressed" from="GUI/Button" to="." method="LoadNextLevel"]

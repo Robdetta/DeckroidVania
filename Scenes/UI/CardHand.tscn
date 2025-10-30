@@ -1,0 +1,39 @@
+[gd_scene load_steps=3 format=3 uid="uid://5niw6g3lwy74"]
+
+[ext_resource type="Script" uid="uid://dktueswvsvlxv" path="res://Game/Systems/Deck/CardManager.cs" id="1_xpl5m"]
+[ext_resource type="Script" uid="uid://dhe4k3d6122p" path="res://Game/Systems/Inputs/InputManager.cs" id="2_ku8mn"]
+
+[node name="CardHand" type="Node"]
+
+[node name="CardUI" type="CanvasLayer" parent="."]
+
+[node name="CardDisplay" type="Control" parent="CardUI"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 36.0
+offset_top = 769.0
+offset_right = 1116.0
+offset_bottom = 1053.0
+
+[node name="SlotArea" type="Node2D" parent="CardUI/CardDisplay"]
+
+[node name="Slot1" type="Marker2D" parent="CardUI/CardDisplay/SlotArea"]
+
+[node name="Slot2" type="Marker2D" parent="CardUI/CardDisplay/SlotArea"]
+position = Vector2(300, 150)
+
+[node name="Slot3" type="Marker2D" parent="CardUI/CardDisplay/SlotArea"]
+position = Vector2(500, 150)
+
+[node name="Slot4" type="Marker2D" parent="CardUI/CardDisplay/SlotArea"]
+position = Vector2(700, 150)
+
+[node name="Slot5" type="Marker2D" parent="CardUI/CardDisplay/SlotArea"]
+position = Vector2(900, 150)
+
+[node name="CardManager" type="Node" parent="."]
+script = ExtResource("1_xpl5m")
+_inputManagerPath = NodePath("../InputManager")
+
+[node name="InputManager" type="Node" parent="."]
+script = ExtResource("2_ku8mn")

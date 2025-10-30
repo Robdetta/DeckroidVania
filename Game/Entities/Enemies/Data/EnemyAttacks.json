@@ -1,0 +1,45 @@
+{
+  "attacks": [
+    {
+      "id": "001_sword_slash",
+      "name": "Sword Slash",
+      "type": "melee",
+      "damage": 15,
+      "range": 4,
+      "cooldown": 1.5,
+      "animationName": "sword_slash",
+      "weight": 100
+    },
+    {
+      "id": "002_shield_bash",
+      "name": "Shield Bash",
+      "type": "melee",
+      "damage": 10,
+      "range": 3,
+      "cooldown": 2.0,
+      "animationName": "shield_bash",
+      "weight": 30
+    },
+    {
+      "id": "003_fireball",
+      "name": "Fireball",
+      "type": "rangedprojectile",
+      "damage": 20,
+      "range": 50,
+      "cooldown": 1.0,
+      "animationName": "fireball",
+      "projectileScene": "uid://0ihjx6owfl1h",
+      "weight": 100
+    },
+    {
+      "id": "004_staff_strike",
+      "name": "Staff Strike",
+      "type": "melee",
+      "damage": 8,
+      "range": 3,
+      "cooldown": 0.8,
+      "animationName": "staff_strike",
+      "weight": 40
+    }
+  ]
+}

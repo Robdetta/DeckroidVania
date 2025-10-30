@@ -1,0 +1,31 @@
+[
+  {
+    "Id": 1,
+    "Name": "Slash",
+    "Damage": 10,
+    "Range": 2.0,
+    "Animation": "Attack",
+    "Duration": 1.0,
+    "Lockout": 0.9,
+    "Hitbox": "Player/Visual/RootNode/Hitbox",
+    "HitboxSize": [1, 2, 1],
+    "HitboxOffset": [1, 0, 0],
+    "KnockbackForce": 20,
+    "KnockbackDuration": 0.1
+  },
+  {
+    "Id": 2,
+    "Name": "Projectile",
+    "Damage": 12,
+    "Range": 1.0,
+    "Animation": "Projectile",
+    "Duration": 1.0,
+    "Lockout": 0.9,
+    "ProjectileScene": "uid://0ihjx6owfl1h",
+    "ProjectileSpeed": 10.0,
+    "ProjectileLifetime": 600.0,
+    "ProjectileColor": "#FF00FF",
+    "KnockbackForce": 30.0,
+    "KnockbackDuration": 0.1
+  }
+]

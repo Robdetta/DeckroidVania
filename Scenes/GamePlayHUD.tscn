@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3 uid="uid://4lwc62aqullf"]
+
+[ext_resource type="Texture2D" uid="uid://d1ad7rco1gc1e" path="res://Assets/Assets/TEST/UI_Mobile2/Individual/UI_Mobile_InterfaceButtons_rect92.png" id="1_i36kh"]
+[ext_resource type="Texture2D" uid="uid://dol52yof62s0k" path="res://Assets/Assets/TEST/UI_Mobile2/Individual/UI_Mobile_InterfaceButtons_g225.png" id="2_yvfvk"]
+
+[node name="GamePlayHud" type="CanvasLayer"]
+
+[node name="PlayerHealthBar" type="ProgressBar" parent="."]
+offset_left = 54.0
+offset_top = 38.0
+offset_right = 683.0
+offset_bottom = 88.0
+
+[node name="PlayerManaBar" type="TextureProgressBar" parent="."]
+offset_left = 58.0
+offset_top = 109.0
+offset_right = 1485.0
+offset_bottom = 225.0
+scale = Vector2(0.4, 0.4)
+value = 90.0
+texture_under = ExtResource("1_i36kh")
+texture_progress = ExtResource("2_yvfvk")
+
+[node name="DeckCountLabel" type="Label" parent="."]
+anchors_preset = -1
+anchor_bottom = 0.575
+offset_left = 55.0
+offset_top = 698.0
+offset_right = 246.0
+offset_bottom = 718.0
+theme_override_font_sizes/font_size = 30
+text = "Deck: 0/0"

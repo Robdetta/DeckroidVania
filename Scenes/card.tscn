@@ -1,0 +1,59 @@
+[gd_scene load_steps=3 format=3 uid="uid://pi5b3ukve1re"]
+
+[ext_resource type="Texture2D" uid="uid://c1uk11hpgxbht" path="res://Assets/cardmockup1.png" id="1_57tax"]
+[ext_resource type="Script" uid="uid://btavibicnjmod" path="res://Game/Systems/Deck/Cards/Card.cs" id="1_enxpg"]
+
+[node name="Card" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+scale = Vector2(0.1, 0.1)
+script = ExtResource("1_enxpg")
+
+[node name="CardVisuals" type="Node2D" parent="."]
+
+[node name="BaseCardImage" type="Sprite2D" parent="CardVisuals"]
+position = Vector2(105.875, 155.05)
+scale = Vector2(0.368584, 0.388346)
+texture = ExtResource("1_57tax")
+
+[node name="Mana" type="Node2D" parent="CardVisuals"]
+scale = Vector2(1.5, 1.5)
+
+[node name="CostBaseSprite" type="Sprite2D" parent="CardVisuals/Mana"]
+
+[node name="ManaCost" type="Label" parent="CardVisuals/Mana"]
+offset_left = 20.0
+offset_top = 6.66667
+offset_right = 30.0
+offset_bottom = 29.6667
+scale = Vector2(2, 2)
+horizontal_alignment = 2
+
+[node name="Name" type="Node2D" parent="CardVisuals"]
+
+[node name="CardName" type="Label" parent="CardVisuals/Name"]
+offset_left = 70.0
+offset_top = 10.0
+offset_right = 318.0
+offset_bottom = 52.0
+scale = Vector2(2, 2)
+
+[node name="CardArt" type="Sprite2D" parent="CardVisuals"]
+
+[node name="Type" type="Node2D" parent="CardVisuals"]
+
+[node name="CardType" type="Label" parent="CardVisuals/Type"]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="Activate" type="Node2D" parent="CardVisuals"]
+
+[node name="ActivateEffect" type="Label" parent="CardVisuals/Activate"]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="Sacrifice" type="Node2D" parent="CardVisuals"]
+
+[node name="SacrificeEffect" type="Label" parent="CardVisuals/Sacrifice"]
+offset_right = 40.0
+offset_bottom = 23.0

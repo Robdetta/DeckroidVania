@@ -1,0 +1,38 @@
+{
+  "id": "mage_basic",
+  "name": "Dark Mage",
+  "type": "mage",
+  "health": {
+    "maxHealth": 50,
+    "healthRegen": 0
+  },
+  "movement": {
+    "patrolSpeed": 5,
+    "patrolRange": 5
+  },
+  "vision": {
+    "detectionRange": 300,
+    "loseTargetRange": 400
+  },
+  "combat": {
+    "chaseSpeed": 15,
+    "attackRange": 10,
+    "attackCooldown": 1.0,
+    "knockbackResistance": 0,
+    "detectionBehavior": "attack",
+    "defaultAttackId": "003_fireball",
+    "defaultIdlestate": "Idle",
+    "attackRanges": {
+      "melee": {
+        "minDistance": 0,
+        "maxDistance": 5,
+        "attacks": ["004_staff_strike"]
+      },
+      "ranged": {
+        "minDistance": 5,
+        "maxDistance": 100,
+        "attacks": ["003_fireball"]
+      }
+    }
+  }
+}

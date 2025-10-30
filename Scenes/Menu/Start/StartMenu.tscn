@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3 uid="uid://crqqgm7xw7g08"]
+
+[ext_resource type="Script" uid="uid://cwbju7cy0fftb" path="res://Scenes/Menu/Start/StartMenu.cs" id="1_0ikro"]
+
+[node name="StartMenu" type="CanvasLayer"]
+script = ExtResource("1_0ikro")
+
+[node name="Panel" type="Panel" parent="."]
+offset_right = 1923.0
+offset_bottom = 1079.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+layout_mode = 0
+offset_left = 782.0
+offset_top = 366.0
+offset_right = 1128.0
+offset_bottom = 628.0
+
+[node name="StartGame" type="Button" parent="Panel/VBoxContainer"]
+layout_mode = 2
+text = "Start Game"

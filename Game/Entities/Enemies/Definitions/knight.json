@@ -1,0 +1,33 @@
+{
+  "id": "knight_basic",
+  "name": "Dark Knight",
+  "type": "knight",
+  "health": {
+    "maxHealth": 100,
+    "healthRegen": 0
+  },
+  "movement": {
+    "patrolSpeed": 3,
+    "patrolRange": 20
+  },
+  "vision": {
+    "detectionRange": 200,
+    "loseTargetRange": 300
+  },
+  "combat": {
+    "chaseSpeed": 10,
+    "attackRange": 2,
+    "attackCooldown": 1.5,
+    "knockbackResistance": 0.3,
+    "detectionBehavior": "chase",
+    "defaultAttackId": "001_sword_slash",
+    "defaultIdleState": "Patrol",
+    "attackRanges": {
+      "melee": {
+        "minDistance": 0,
+        "maxDistance": 5,
+        "attacks": ["001_sword_slash"]
+      }
+    }
+  }
+}

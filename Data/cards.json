@@ -1,0 +1,42 @@
+[
+	{
+		"id": 1,
+		"cardName": "Absolute Virtue",
+		"type": "Core Card - Faith and Integrity",
+		"manaCost": 4,
+		"activateEffect": "Grants player an @Enchantment for 16 seconds. While enchanted, guarding with Integrity will always trigger a parry, even if the timing window is missed.",
+		"sacrificeEffect": "Grants player an @Enchantment for 24 seconds which reduces damage taken on a miss-timed parry to 0."
+	},
+	{
+		"id": 2,
+		"cardName": "Divine Strike",
+		"type": "Core Card - Holy Power",
+		"manaCost": 3,
+		"activateEffect": "Deals 50 damage to all enemies within a radius.",
+		"sacrificeEffect": "Sacrifices 25% health to deal double damage to enemies."
+	},
+	{
+		"id": 3,
+		"cardName": "Holy Light",
+		"type": "Core Card - Healing Power",
+		"manaCost": 2,
+		"activateEffect": "Heals 30 HP to the player.",
+		"sacrificeEffect": "Fully restores HP but costs all remaining mana."
+	},
+	{
+		"id": 4,
+		"cardName": "Shadow Bolt",
+		"type": "Core Card - Dark Magic",
+		"manaCost": 5,
+		"activateEffect": "Deals 80 damage to a single enemy.",
+		"sacrificeEffect": "Reduces the enemy's defense by 50% for 10 seconds."
+	},
+	{
+		"id": 5,
+		"cardName": "Elemental Fury",
+		"type": "Core Card - Elemental Power",
+		"manaCost": 6,
+		"activateEffect": "Deals 40 damage to all enemies and applies Burn status for 5 seconds.",
+		"sacrificeEffect": "Summons a Fire Elemental to fight alongside the player."
+	}
+]

@@ -1,0 +1,5 @@
+[submodule "Assets"]
+	path = Assets
+	url = https://gitea.robbiehem.dev/robbie/Assets.git
+[submodule "assets"]
+	url = https://gitea.robbiehem.dev/robbie/Assets.git

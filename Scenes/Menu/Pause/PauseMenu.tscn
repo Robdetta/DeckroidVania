@@ -1,0 +1,26 @@
+[gd_scene load_steps=2 format=3 uid="uid://bo7isj7ncgdpa"]
+
+[ext_resource type="Script" uid="uid://cl2us0m5mo0mb" path="res://Scenes/Menu/Pause/PauseMenu.cs" id="1_xuox1"]
+
+[node name="PauseMenu" type="CanvasLayer"]
+script = ExtResource("1_xuox1")
+
+[node name="Panel" type="Panel" parent="."]
+offset_right = 1923.0
+offset_bottom = 1079.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+layout_mode = 0
+offset_left = 782.0
+offset_top = 366.0
+offset_right = 1128.0
+offset_bottom = 628.0
+
+[node name="Pause" type="Label" parent="Panel/VBoxContainer"]
+layout_mode = 2
+text = "Paused"
+horizontal_alignment = 1
+
+[node name="Resume" type="Button" parent="Panel/VBoxContainer"]
+layout_mode = 2
+text = "Resume"

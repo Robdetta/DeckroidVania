@@ -1,0 +1,22 @@
+[
+  {
+    "Id": 1,
+    "Name": "Axe",
+    "AttackIds": [1],
+    "DamageMultiplier": 1.2,
+    "Range": 2.5,
+    "HitboxScene": "uid://cnydc1q6nic2i",
+    "AttachmentNode": "Player/Visual/RootNode/Skeleton/HandAttachment/HandContainer",
+    "Scene": "uid://dq80ekev2myfb"
+  },
+  {
+    "Id": 2,
+    "Name": "Wand",
+    "AttackIds": [2],
+    "DamageMultiplier": 1.0,
+    "Range": 1.5,
+    "HitboxScene": "",
+    "AttachmentNode": "Player/Visual/RootNode/Skeleton/HandAttachment/HandContainer",
+    "Scene": "uid://yvxc2demh6lp"
+  }
+]
