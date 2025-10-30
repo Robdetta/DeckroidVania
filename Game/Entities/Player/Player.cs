@@ -32,7 +32,7 @@ public partial class Player : CharacterBody3D
     {
         _movementController.Initialize(this);
         _weaponManager = new WeaponManager(this);
-        _weaponManager.EquipWeaponById(2);
+        _weaponManager.EquipWeaponById(1);  //testing github syncing
         
         _attackManager = new AttackManager(this, _weaponManager, _weaponManager.GetCurrentWeapon().AttackIds[0]);
 
