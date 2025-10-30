@@ -13,25 +13,26 @@ public partial class MageAnimationTree : EnemyAnimationTree
         Attack = 5,
         // Mage-specific states
         Casting = 6,
-        SpellAttack = 7
+        SpellAttack = 7,
+        MeleeAttack = 8
     }
 
     public override void ChangeState(EnemyAnimationState newState)
     {
         // Handle mage-specific states
-        if (newState == (EnemyAnimationState)MageAnimationState.Casting)
+        if (newState == (EnemyAnimationState)MageAnimationState.MeleeAttack)
         {
             _currentState = newState;
-            _playback.Travel("Casting");
-            GD.Print("[MageAnimationTree] Changed to Casting");
+            _playback.Travel("Melee");
+            GD.Print("[MageAnimationTree] Changed to MeleeAttack");
             return;
         }
 
         if (newState == (EnemyAnimationState)MageAnimationState.SpellAttack)
         {
             _currentState = newState;
-            _playback.Travel("SpellAttack");
-            GD.Print("[MageAnimationTree] Changed to SpellAttack");
+            _playback.Travel("Casting");
+            GD.Print("[MageAnimationTree] Changed to Casting");
             return;
         }
 
@@ -47,11 +48,45 @@ public partial class MageAnimationTree : EnemyAnimationTree
             return;
         }
 
-        GD.Print($"[MageAnimationTree] Playing spell attack: {animationName}");
+        GD.Print($"[MageAnimationTree] Playing attack animation: {animationName}");
         
-        // Travel to the specific spell animation
-        _playback.Travel(animationName);
+        // Map animation name to AnimationTree node name based on attack type
+        string nodeToTravel = DetermineAnimationNode(animationName);
+        
+        GD.Print($"[MageAnimationTree]   Animation: {animationName} → Node: {nodeToTravel}");
+        
+        // Travel to the appropriate AnimationTree node
+        _playback.Travel(nodeToTravel);
         _currentState = (EnemyAnimationState)MageAnimationState.SpellAttack;
+    }
+
+    /// <summary>
+    /// Maps attack animation names to AnimationTree node names
+    /// Since the JSON already uses node names (Casting, Melee), just pass through
+    /// </summary>
+    private string DetermineAnimationNode(string animationName)
+    {
+        // The animationName from JSON is already the node name (Casting or Melee)
+        // Just validate it's one we expect
+        if (animationName == "Melee" || animationName == "Casting")
+        {
+            return animationName;
+        }
+        
+        // Fallback for old animation names (if any slip through)
+        if (animationName == "staff_strike")
+        {
+            return "Melee";
+        }
+        
+        if (animationName == "fireball")
+        {
+            return "Casting";
+        }
+        
+        // Default to Casting for any unknown spell-like attacks
+        GD.PushWarning($"[MageAnimationTree] Unknown animation '{animationName}', defaulting to Casting");
+        return "Casting";
     }
 
     public bool IsCastingOrAttacking()

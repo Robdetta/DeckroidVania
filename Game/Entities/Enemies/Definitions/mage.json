@@ -20,7 +20,7 @@
     "attackCooldown": 1.0,
     "knockbackResistance": 0,
     "detectionBehavior": "attack",
-    "defaultAttackId": "003_fireball",
+    "defaultAttackId": "004_staff_strike",
     "defaultIdlestate": "Idle",
     "attackRanges": {
       "melee": {

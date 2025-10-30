@@ -43,10 +43,11 @@ namespace DeckroidVania.Game.Entities.Enemies.Components
 
         public EnemyAttackData SelectAttack(float distanceToTarget)
         {
+            GD.Print($"[CombatComponent] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            GD.Print($"[CombatComponent] 📏 Distance to target: {distanceToTarget:F2}m");
+            
             if (_attackRanges == null)
             {
-
-
                 GD.PushError("[CombatComponent] AttackRanges is NULL!");
                 return null;
             }
@@ -61,6 +62,7 @@ namespace DeckroidVania.Game.Entities.Enemies.Components
             {
                 applicableRange = _attackRanges.Melee;
                 rangeName = "melee";
+                GD.Print($"[CombatComponent] ✅ IN MELEE RANGE ({_attackRanges.Melee.MinDistance}-{_attackRanges.Melee.MaxDistance}m)");
             }
             else if (_attackRanges.Ranged != null && 
                 distanceToTarget >= _attackRanges.Ranged.MinDistance && 
@@ -68,6 +70,13 @@ namespace DeckroidVania.Game.Entities.Enemies.Components
             {
                 applicableRange = _attackRanges.Ranged;
                 rangeName = "ranged";
+                GD.Print($"[CombatComponent] 🎯 IN RANGED ({_attackRanges.Ranged.MinDistance}-{_attackRanges.Ranged.MaxDistance}m)");
+            }
+            else
+            {
+                GD.Print($"[CombatComponent] ❌ OUT OF RANGE");
+                GD.Print($"[CombatComponent]    Melee: {_attackRanges.Melee?.MinDistance ?? 0}-{_attackRanges.Melee?.MaxDistance ?? 0}m");
+                GD.Print($"[CombatComponent]    Ranged: {_attackRanges.Ranged?.MinDistance ?? 0}-{_attackRanges.Ranged?.MaxDistance ?? 0}m");
             }
 
             if (applicableRange == null || applicableRange.Attacks.Count == 0)
@@ -91,8 +100,18 @@ namespace DeckroidVania.Game.Entities.Enemies.Components
             
             if (CurrentAttack != null)
             {
-                GD.Print($"[CombatComponent] Selected {rangeName} attack: {CurrentAttack.Name} (distance: {distanceToTarget:F1}m)");
+                GD.Print($"[CombatComponent] 🎲 Selected {rangeName} attack:");
+                GD.Print($"[CombatComponent]    Name: {CurrentAttack.Name}");
+                GD.Print($"[CombatComponent]    ID: {attackId}");
+                GD.Print($"[CombatComponent]    Animation: {CurrentAttack.AnimationName}");
+                GD.Print($"[CombatComponent]    Type: {CurrentAttack.Type}");
             }
+            else
+            {
+                GD.PushError($"[CombatComponent] ❌ Attack '{attackId}' not found in database!");
+            }
+            
+            GD.Print($"[CombatComponent] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             
             return CurrentAttack;
         }

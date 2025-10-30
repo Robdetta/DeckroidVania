@@ -27,7 +27,7 @@
       "damage": 20,
       "range": 50,
       "cooldown": 1.0,
-      "animationName": "fireball",
+      "animationName": "Casting",
       "projectileScene": "uid://0ihjx6owfl1h",
       "weight": 100
     },
@@ -38,7 +38,7 @@
       "damage": 8,
       "range": 3,
       "cooldown": 0.8,
-      "animationName": "staff_strike",
+      "animationName": "Melee",
       "weight": 40
     }
   ]
