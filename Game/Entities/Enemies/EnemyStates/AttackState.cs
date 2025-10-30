@@ -126,6 +126,23 @@ namespace DeckroidVania.Game.Entities.Enemies.States
 
         private void PerformAttack()
         {
+            // Re-evaluate which attack to use based on current distance
+            // This allows dynamic switching between melee/ranged attacks
+            if (_enemy?.AIComponent != null && _enemy?.CombatComponent != null)
+            {
+                float currentDistance = _enemy.AIComponent.GetDistanceToTarget();
+                EnemyAttackData newAttack = _enemy.CombatComponent.SelectAttack(currentDistance);
+                
+                if (newAttack != null)
+                {
+                    _currentAttack = newAttack;
+                }
+                else
+                {
+                    GD.PushWarning("[AttackState] No attack available at current distance, keeping current attack");
+                }
+            }
+            
             // NEW: Use CombatComponent to execute attack
             if (_enemy?.CombatComponent != null)
             {

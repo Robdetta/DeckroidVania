@@ -19,6 +19,17 @@ public partial class MageAnimationTree : EnemyAnimationTree
 
     public override void ChangeState(EnemyAnimationState newState)
     {
+        // Handle generic Attack state for Mage
+        // Don't transition to a specific animation yet - wait for PlayAttackAnimation()
+        // to determine if it's Melee or Casting based on attack type
+        if (newState == EnemyAnimationState.Attack)
+        {
+            _currentState = newState;
+            GD.Print("[MageAnimationTree] Entering Attack state (waiting for specific animation)");
+            // Don't travel anywhere - stay in current state until PlayAttackAnimation is called
+            return;
+        }
+        
         // Handle mage-specific states
         if (newState == (EnemyAnimationState)MageAnimationState.MeleeAttack)
         {
@@ -36,7 +47,7 @@ public partial class MageAnimationTree : EnemyAnimationTree
             return;
         }
 
-        // Fallback to base class for common states
+        // Fallback to base class for common states (Idle, Walking, etc.)
         base.ChangeState(newState);
     }
 
@@ -57,7 +68,21 @@ public partial class MageAnimationTree : EnemyAnimationTree
         
         // Travel to the appropriate AnimationTree node
         _playback.Travel(nodeToTravel);
-        _currentState = (EnemyAnimationState)MageAnimationState.SpellAttack;
+        
+        // Set state based on which animation we're playing
+        if (nodeToTravel == "Melee")
+        {
+            _currentState = (EnemyAnimationState)MageAnimationState.MeleeAttack;
+        }
+        else if (nodeToTravel == "Casting")
+        {
+            _currentState = (EnemyAnimationState)MageAnimationState.SpellAttack;
+        }
+        else
+        {
+            // Fallback to generic Attack state
+            _currentState = EnemyAnimationState.Attack;
+        }
     }
 
     /// <summary>
@@ -89,11 +114,11 @@ public partial class MageAnimationTree : EnemyAnimationTree
         return "Casting";
     }
 
-    public bool IsCastingOrAttacking()
-    {
-        return _currentState == (EnemyAnimationState)MageAnimationState.Casting || 
-               _currentState == (EnemyAnimationState)MageAnimationState.SpellAttack;
-    }
+    // public bool IsCastingOrAttacking()
+    // {
+    //     return _currentState == (EnemyAnimationState)MageAnimationState.Casting || 
+    //            _currentState == (EnemyAnimationState)MageAnimationState.SpellAttack;
+    // }
 
 
     //WIP
