@@ -45,10 +45,38 @@ namespace DeckroidVania.Game.Entities.Enemies.States
 
             if (_knockbackTimer <= 0)
             {
-                // Use legacy controller for actual state change
-                if (_enemy?._movementController != null)
+                // Return to appropriate state based on whether we have a target
+                if (_enemy?._movementController != null && _enemy?.AIComponent != null)
                 {
-                    _enemy._movementController.ChangeState(EnemyState.Falling);
+                    // If we have a target, return to combat (Chase or Attack)
+                    if (_enemy.AIComponent.HasTarget())
+                    {
+                        float distanceToTarget = _enemy.AIComponent.GetDistanceToTarget();
+                        
+                        // Check if in attack range
+                        if (_enemy.CombatComponent?.CurrentAttack != null)
+                        {
+                            float attackRange = _enemy.CombatComponent.CurrentAttack.Range;
+                            if (distanceToTarget <= attackRange)
+                            {
+                                _enemy._movementController.ChangeState(EnemyState.Attack);
+                            }
+                            else
+                            {
+                                _enemy._movementController.ChangeState(EnemyState.Chase);
+                            }
+                        }
+                        else
+                        {
+                            // No attack set, default to chase
+                            _enemy._movementController.ChangeState(EnemyState.Chase);
+                        }
+                    }
+                    else
+                    {
+                        // No target, return to idle/patrol
+                        _enemy._movementController.ChangeState(EnemyState.Idle);
+                    }
                 }
                 return;
             }

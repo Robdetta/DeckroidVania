@@ -31,7 +31,7 @@ public partial class KnightAnimationTree : EnemyAnimationTree
         if (newState == (EnemyAnimationState)KnightAnimationState.Attack)
         {
             _currentState = newState;
-            _playback.Travel("Attack");
+            _playback.Travel("Melee");
             GD.Print("[KnightAnimationTree] Changed to Attack");
             return;
         }

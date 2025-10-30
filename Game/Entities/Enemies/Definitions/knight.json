@@ -16,7 +16,7 @@
   },
   "combat": {
     "chaseSpeed": 10,
-    "attackRange": 2,
+    "attackRange": 1,
     "attackCooldown": 1.5,
     "knockbackResistance": 0.3,
     "detectionBehavior": "chase",
@@ -25,8 +25,13 @@
     "attackRanges": {
       "melee": {
         "minDistance": 0,
-        "maxDistance": 5,
-        "attacks": ["001_sword_slash"]
+        "maxDistance": 3,
+        "attacks": [
+          "001_sword_slash",
+          "002_shield_bash",
+          "001_sword_slash",
+          "002_shield_bash"
+        ]
       }
     }
   }

@@ -7,7 +7,7 @@
       "damage": 15,
       "range": 4,
       "cooldown": 1.5,
-      "animationName": "sword_slash",
+      "animationName": "Melee",
       "weight": 100
     },
     {
@@ -17,7 +17,7 @@
       "damage": 10,
       "range": 3,
       "cooldown": 2.0,
-      "animationName": "shield_bash",
+      "animationName": "Shield",
       "weight": 30
     },
     {
