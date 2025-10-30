@@ -76,21 +76,16 @@ namespace DeckroidVania.Game.Entities.Enemies.States
             Node3D target = _enemy.AIComponent.CurrentTarget;
             float distanceToTarget = _enemy.AIComponent.GetDistanceToTarget();
 
-            // Don't re-select attacks during attack - stick with the one we entered with
-            // This prevents issues where rotating to a shorter-range attack kicks us out
-            
             // Check if target is STILL in range for our current attack
             // Add a small buffer (1.5x range) to prevent immediate chase-attack loop
             float effectiveRange = _currentAttack.Range * 1.5f;
             if (distanceToTarget > effectiveRange)
             {
-                // Mages return to idle, melee enemies chase
-                EnemyState nextState = (_enemy is MageEnemy) ? EnemyState.Idle : EnemyState.Chase;
-                
-                // Use legacy controller for actual state change
+                // Always return to Chase to re-evaluate attacks at new distance
+                // Once in Chase state, it will re-enter Attack when in range again
                 if (_enemy?._movementController != null)
                 {
-                    _enemy._movementController.ChangeState(nextState);
+                    _enemy._movementController.ChangeState(EnemyState.Chase);
                 }
                 
                 return;

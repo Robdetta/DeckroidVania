@@ -11,12 +11,12 @@
     "patrolRange": 5
   },
   "vision": {
-    "detectionRange": 300,
-    "loseTargetRange": 400
+    "detectionRange": 15,
+    "loseTargetRange": 15
   },
   "combat": {
     "chaseSpeed": 15,
-    "attackRange": 10,
+    "attackRange": 5,
     "attackCooldown": 1.0,
     "knockbackResistance": 0,
     "detectionBehavior": "attack",
