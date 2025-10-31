@@ -93,7 +93,13 @@ namespace DeckroidVania.Game.Entities.Enemies.States
             {
                 GD.Print($"[ChaseState] 📍 Target directly above us (X diff: {xDifference:F2}), stopping horizontal chase");
                 _enemy.MovementComponent.SetHorizontalVelocity(0f);
-                // Keep current facing direction - no need to flip
+                
+                // Switch to Idle animation while waiting for player to move
+                if (_enemy?.AnimationComponent != null)
+                {
+                    _enemy.AnimationComponent.ChangeState((int)EnemyAnimationTree.EnemyAnimationState.Idle);
+                }
+                
                 return;
             }
             
@@ -106,6 +112,12 @@ namespace DeckroidVania.Game.Entities.Enemies.States
                 float velocityToSet = directionToTarget * _chaseSpeed;
                 _enemy.MovementComponent.SetHorizontalVelocity(velocityToSet);
                 _enemy.MovementComponent.FaceRight = (directionToTarget > 0);
+                
+                // Switch back to Running animation when chasing
+                if (_enemy?.AnimationComponent != null)
+                {
+                    _enemy.AnimationComponent.ChangeState((int)EnemyAnimationTree.EnemyAnimationState.Running);
+                }
                 
                 GD.Print($"[ChaseState] 🔄 Chasing in direction: {(directionToTarget > 0 ? "RIGHT" : "LEFT")} (X diff: {xDifference:F2})");
             }

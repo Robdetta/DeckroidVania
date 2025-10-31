@@ -18,10 +18,11 @@ namespace DeckroidVania.Game.Entities.Enemies.Components.Interfaces
         event Action<Node3D> OnTargetLost;
         
 
-        /// Setup the vision area detection
+        /// Setup the vision area detection with JSON-defined ranges
         /// <param name="visionArea">The Area3D node to monitor</param>
+        /// <param name="detectionRange">The detection radius in units (from JSON)</param>
         /// <param name="targetGroup">Which group to detect (e.g., "Player")</param>
-        void Initialize(Area3D visionArea, string targetGroup = "Player");
+        void Initialize(Area3D visionArea, float detectionRange, string targetGroup = "Player");
         
 
         /// Check if a target is currently in vision

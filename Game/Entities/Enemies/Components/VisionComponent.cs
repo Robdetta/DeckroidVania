@@ -18,15 +18,18 @@ namespace DeckroidVania.Game.Entities.Enemies.Components
         private Area3D _visionArea;           // The detection bubble
         private string _targetGroup = "Player"; // What we're looking for
         private Node3D _currentTarget;         // Who we're currently tracking
+        private float _detectionRange;        // Radius of vision area (from JSON)
         
         /// <summary>
-        /// Setup vision detection
+        /// Setup vision detection and apply detection range from JSON
         /// </summary>
         /// <param name="visionArea">The Area3D node (the detection sphere)</param>
+        /// <param name="detectionRange">The detection radius in units (from JSON)</param>
         /// <param name="targetGroup">Which group to look for (default: "Player")</param>
-        public void Initialize(Area3D visionArea, string targetGroup = "Player")
+        public void Initialize(Area3D visionArea, float detectionRange, string targetGroup = "Player")
         {
             _visionArea = visionArea;
+            _detectionRange = detectionRange;
             _targetGroup = targetGroup;
             
             if (_visionArea == null)
@@ -35,12 +38,27 @@ namespace DeckroidVania.Game.Entities.Enemies.Components
                 return;
             }
             
+            // ═══════════════════════════════════════════════════════════
+            // APPLY DETECTION RANGE FROM JSON TO THE AREA3D
+            // ═══════════════════════════════════════════════════════════
+            // Find the CollisionShape3D child and scale it based on detection range
+            var collisionShape = _visionArea.GetNode<CollisionShape3D>("CollisionShape3D");
+            if (collisionShape != null && collisionShape.Shape is SphereShape3D sphere)
+            {
+                sphere.Radius = _detectionRange;
+                GD.Print($"[VisionComponent] 🎯 Set detection radius to {_detectionRange}m");
+            }
+            else
+            {
+                GD.PushWarning("[VisionComponent] Could not find CollisionShape3D/SphereShape3D!");
+            }
+            
             // Connect to Godot signals - when bodies enter/exit the Area3D
             // "+=" means "subscribe to this event"
             _visionArea.BodyEntered += OnBodyEnteredVisionArea;
             _visionArea.BodyExited += OnBodyExitedVisionArea;
             
-            GD.Print($"[VisionComponent] Initialized - Looking for '{_targetGroup}' group");
+            GD.Print($"[VisionComponent] Initialized - Detection: {_detectionRange}m, Looking for '{_targetGroup}' group");
         }
         
         /// <summary>

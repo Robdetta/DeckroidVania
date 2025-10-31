@@ -11,8 +11,7 @@
     "patrolRange": 20
   },
   "vision": {
-    "detectionRange": 200,
-    "loseTargetRange": 300
+    "detectionRange": 5
   },
   "combat": {
     "chaseSpeed": 10,
@@ -22,6 +21,12 @@
     "detectionBehavior": "chase",
     "defaultAttackId": "001_sword_slash",
     "defaultIdleState": "Patrol",
+    "spatialBehavior": {
+      "optimalRangeMin": 2,
+      "optimalRangeMax": 5,
+      "loseTargetRange": 80,
+      "repositioningEnabled": false
+    },
     "attackRanges": {
       "melee": {
         "minDistance": 0,

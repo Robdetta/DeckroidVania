@@ -123,7 +123,9 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
             var visionArea = GetNodeOrNull<Area3D>("VisionArea");
             if (visionArea != null)
             {
-                visionComp.Initialize(visionArea, "Player");
+                // Pass detection range from JSON to VisionComponent
+                float detectionRange = enemyData.Vision.DetectionRange;
+                visionComp.Initialize(visionArea, detectionRange, "Player");
                 
                 // Subscribe to vision events - when VisionComponent detects/loses targets
                 // This is the "glue" connecting VisionComponent to AIComponent

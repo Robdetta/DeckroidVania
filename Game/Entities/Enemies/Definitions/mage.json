@@ -11,8 +11,8 @@
     "patrolRange": 5
   },
   "vision": {
-    "detectionRange": 15,
-    "loseTargetRange": 15
+    "detectionRange": 60,
+    "loseTargetRange": 400
   },
   "combat": {
     "chaseSpeed": 15,
@@ -22,6 +22,12 @@
     "detectionBehavior": "attack",
     "defaultAttackId": "004_staff_strike",
     "defaultIdlestate": "Idle",
+    "spatialBehavior": {
+      "optimalRangeMin": 15,
+      "optimalRangeMax": 50,
+      "loseTargetRange": 80,
+      "repositioningEnabled": true
+    },
     "attackRanges": {
       "melee": {
         "minDistance": 0,
