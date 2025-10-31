@@ -82,7 +82,23 @@ namespace DeckroidVania.Game.Entities.Enemies.States
             // Calculate direction to target (on X-axis for 2.5D movement)
             Vector3 enemyPos = _enemy.GlobalPosition;
             Vector3 targetPos = _target.GlobalPosition;
-            float directionToTarget = Mathf.Sign(targetPos.X - enemyPos.X);
+            float xDifference = targetPos.X - enemyPos.X;
+            
+            // ═══════════════════════════════════════════════════════════
+            // OPTION D: Stop chasing when target is directly overhead
+            // ═══════════════════════════════════════════════════════════
+            // If target is roughly above us (small X difference), stop chasing
+            // This prevents flipping when player is directly above
+            if (Mathf.Abs(xDifference) < 0.5f)
+            {
+                GD.Print($"[ChaseState] 📍 Target directly above us (X diff: {xDifference:F2}), stopping horizontal chase");
+                _enemy.MovementComponent.SetHorizontalVelocity(0f);
+                // Keep current facing direction - no need to flip
+                return;
+            }
+            
+            // Target is clearly to the left or right - chase normally
+            float directionToTarget = Mathf.Sign(xDifference);
             
             // NEW: Use MovementComponent
             if (_enemy?.MovementComponent != null)
@@ -91,13 +107,7 @@ namespace DeckroidVania.Game.Entities.Enemies.States
                 _enemy.MovementComponent.SetHorizontalVelocity(velocityToSet);
                 _enemy.MovementComponent.FaceRight = (directionToTarget > 0);
                 
-                // Debug: Check if facing and velocity match
-                bool facingRight = _enemy.MovementComponent.FaceRight;
-                bool movingRight = velocityToSet > 0;
-                if (facingRight != movingRight)
-                {
-                    GD.PushWarning($"[ChaseState] ⚠️ MISMATCH! Facing: {(facingRight ? "RIGHT" : "LEFT")}, Moving: {(movingRight ? "RIGHT" : "LEFT")} (vel: {velocityToSet})");
-                }
+                GD.Print($"[ChaseState] 🔄 Chasing in direction: {(directionToTarget > 0 ? "RIGHT" : "LEFT")} (X diff: {xDifference:F2})");
             }
 
             // NEW: Update animation blend

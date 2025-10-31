@@ -12,12 +12,13 @@
     },
     {
       "id": "002_block",
-      "name": "Shield Bash",
-      "type": "melee",
-      "damage": 10,
+      "name": "Block",
+      "type": "defensive",
+      "damage": 0,
       "range": 3,
       "cooldown": 2.0,
       "animationName": "Shield",
+      "stateTransition": "Block",
       "weight": 30
     },
     {

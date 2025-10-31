@@ -15,5 +15,11 @@ namespace DeckroidVania.Game.Entities.Enemies.Data
         public string AnimationName { get; set; }
         public string ProjectileScene { get; set; }
         public int Weight { get; set; } = 100;
+        
+        /// <summary>
+        /// Optional: If set, this "attack" triggers a state transition instead of dealing damage
+        /// Examples: "Block", "Dodge", "Teleport", "Enrage"
+        /// </summary>
+        public string StateTransition { get; set; }
     }
 }

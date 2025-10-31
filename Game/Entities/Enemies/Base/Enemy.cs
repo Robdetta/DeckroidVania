@@ -295,15 +295,26 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
 
         public virtual void TakeDamage(int amount, float knockbackForce, float knockbackDuration, Vector3 attackerPosition)
         {
-            // Check if current state allows taking damage (blocking prevents damage)
+            // Check if current state allows taking damage or knockback (blocking prevents BOTH)
             if (AIComponent != null)
             {
                 var currentState = AIComponent.GetState(AIComponent.CurrentState);
-                if (currentState != null && !currentState.CanTakeDamage)
+                if (currentState != null)
                 {
-                    GD.Print($"[{Name}] 🛡️ BLOCKED! State ({AIComponent.CurrentState}) prevents damage!");
-                    // Could play block sound/particle effect here
-                    return; // Damage completely blocked!
+                    // If damage is blocked, ALSO block knockback
+                    if (!currentState.CanTakeDamage)
+                    {
+                        GD.Print($"[{Name}] 🛡️ BLOCKED! State ({AIComponent.CurrentState}) prevents damage!");
+                        return; // Damage AND knockback completely blocked!
+                    }
+                    
+                    // If knockback is blocked (but damage allowed), still skip knockback
+                    if (!currentState.CanBeKnockedBack)
+                    {
+                        GD.Print($"[{Name}] 🛡️ Knockback blocked! State ({AIComponent.CurrentState}) is immune to knockback!");
+                        HealthComponent?.TakeDamage(amount); // Still take damage though
+                        return;
+                    }
                 }
             }
             

@@ -147,13 +147,37 @@ namespace DeckroidVania.Game.Entities.Enemies.States
                 // This is normal - player might have moved slightly out of range
             }
             
-            // NEW: Use CombatComponent to execute attack
+            // ═══════════════════════════════════════════════════════════
+            // CHECK FOR STATE TRANSITION (Defensive Moves, Special States)
+            // ═══════════════════════════════════════════════════════════
+            if (!string.IsNullOrEmpty(_currentAttack?.StateTransition))
+            {
+                GD.Print($"[AttackState] 🔄 State Transition: {_currentAttack.Name} → {_currentAttack.StateTransition}State");
+                
+                // Parse the state transition string to EnemyState enum
+                if (System.Enum.TryParse(_currentAttack.StateTransition, out EnemyState targetState))
+                {
+                    _enemy.AIComponent.ChangeState(targetState);
+                    return; // Don't execute normal attack - state transition handles it
+                }
+                else
+                {
+                    GD.PushWarning($"[AttackState] Unknown state transition: {_currentAttack.StateTransition}");
+                    // Fall through to normal attack if state doesn't exist
+                }
+            }
+            
+            // ═══════════════════════════════════════════════════════════
+            // NORMAL ATTACK EXECUTION
+            // ═══════════════════════════════════════════════════════════
+            
+            // Use CombatComponent to execute attack
             if (_enemy?.CombatComponent != null)
             {
                 _enemy.CombatComponent.ExecuteAttack();
             }
             
-            // NEW: Use AnimationComponent to play animation
+            // Use AnimationComponent to play animation
             if (_enemy?.AnimationComponent != null && !string.IsNullOrEmpty(_currentAttack.AnimationName))
             {
                 _enemy.AnimationComponent.PlayAttackAnimation(_currentAttack.AnimationName);

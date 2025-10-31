@@ -35,12 +35,11 @@ namespace DeckroidVania.Game.Entities.Enemies.States
                 _enemy.MovementComponent.SetHorizontalVelocity(0f);
             }
             
-            // Play block animation
+            // Play shield block animation
             if (_enemy?.AnimationComponent != null)
             {
-                // You'll need to add "Block" to your AnimationTree
-                // For now, we can use Idle as placeholder
-                _enemy.AnimationComponent.ChangeState((int)EnemyAnimationTree.EnemyAnimationState.Idle);
+                // Play the shield animation directly instead of changing to Idle
+                _enemy.AnimationComponent.PlayAttackAnimation("Shield");
             }
         }
         
