@@ -12,6 +12,9 @@ namespace DeckroidVania.Game.Entities.Enemies.States
         private Vector3 _startPosition;
         private float _patrolSpeed;
         private float _patrolRange;
+        
+        public bool CanBeKnockedBack => true;  // Patrolling can be knocked back
+        public bool CanTakeDamage => true;     // Takes full damage
 
         public PatrolState(Enemy enemy, float speed, float range)
         {

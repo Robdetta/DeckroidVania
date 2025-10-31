@@ -8,6 +8,9 @@ namespace DeckroidVania.Game.Entities.Enemies.States
     public partial class FallingState : IEnemyState
     {
         private Enemy _enemy; // Direct reference to Enemy
+        
+        public bool CanBeKnockedBack => false; // Can't knockback while falling
+        public bool CanTakeDamage => true;     // Can still take damage
 
         public FallingState(Enemy enemy)
         {
@@ -48,10 +51,9 @@ namespace DeckroidVania.Game.Entities.Enemies.States
             // If we land on floor => return to default state
             if (_enemy.IsOnFloor())
             {
-                // Use legacy controller for actual state change
-                if (_enemy?._movementController != null)
+                if (_enemy?.AIComponent != null)
                 {
-                    _enemy._movementController.ChangeState(EnemyState.Patrol);
+                    _enemy.AIComponent.ChangeState(EnemyState.Patrol);
                 }
             }
         }

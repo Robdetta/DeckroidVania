@@ -13,6 +13,10 @@ namespace DeckroidVania.Game.Entities.Enemies.States
         private EnemyAttackData _currentAttack; 
         private float _attackTimer;
         
+        // State properties
+        public bool CanBeKnockedBack => true;  // Attacking can be interrupted
+        public bool CanTakeDamage => true;     // Takes full damage while attacking
+        
         public AttackState(Enemy enemy)
         {
             _enemy = enemy;
@@ -28,7 +32,9 @@ namespace DeckroidVania.Game.Entities.Enemies.States
                 
                 if (_currentAttack == null)
                 {
-                    GD.PushError("[AttackState] No suitable attack found for distance!");
+                    // No attack available at this distance - should chase instead
+                    GD.Print($"[AttackState] No attack available at distance {distanceToTarget} - falling back to Chase");
+                    _enemy.AIComponent.ChangeState(EnemyState.Chase);
                     return;
                 }
             }
@@ -83,9 +89,9 @@ namespace DeckroidVania.Game.Entities.Enemies.States
             {
                 // Always return to Chase to re-evaluate attacks at new distance
                 // Once in Chase state, it will re-enter Attack when in range again
-                if (_enemy?._movementController != null)
+                if (_enemy?.AIComponent != null)
                 {
-                    _enemy._movementController.ChangeState(EnemyState.Chase);
+                    _enemy.AIComponent.ChangeState(EnemyState.Chase);
                 }
                 
                 return;
@@ -130,12 +136,15 @@ namespace DeckroidVania.Game.Entities.Enemies.States
                 
                 if (newAttack != null)
                 {
+                    // Found a better attack for this distance
+                    if (_currentAttack?.Id != newAttack.Id)
+                    {
+                        GD.Print($"[AttackState] Switching attack: {_currentAttack?.Name} → {newAttack.Name}");
+                    }
                     _currentAttack = newAttack;
                 }
-                else
-                {
-                    GD.PushWarning("[AttackState] No attack available at current distance, keeping current attack");
-                }
+                // If no attack available, silently keep current attack
+                // This is normal - player might have moved slightly out of range
             }
             
             // NEW: Use CombatComponent to execute attack
@@ -167,10 +176,9 @@ namespace DeckroidVania.Game.Entities.Enemies.States
                 defaultState = EnemyState.Patrol; // Knights patrol by default
             }
             
-            // Use legacy controller for actual state change
-            if (_enemy?._movementController != null)
+            if (_enemy?.AIComponent != null)
             {
-                _enemy._movementController.ChangeState(defaultState);
+                _enemy.AIComponent.ChangeState(defaultState);
             }
         }
     }

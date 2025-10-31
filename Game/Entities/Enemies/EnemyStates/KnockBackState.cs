@@ -12,6 +12,9 @@ namespace DeckroidVania.Game.Entities.Enemies.States
         private float _knockbackDuration;
         public float _knockbackTimer;
         private float _gravity = 800f;
+        
+        public bool CanBeKnockedBack => false; // Already in knockback, can't stack!
+        public bool CanTakeDamage => true;     // Can still take damage while flying back
 
         public KnockBackState(Enemy enemy)
         {
@@ -46,36 +49,41 @@ namespace DeckroidVania.Game.Entities.Enemies.States
             if (_knockbackTimer <= 0)
             {
                 // Return to appropriate state based on whether we have a target
-                if (_enemy?._movementController != null && _enemy?.AIComponent != null)
+                if (_enemy?.AIComponent != null)
                 {
                     // If we have a target, return to combat (Chase or Attack)
                     if (_enemy.AIComponent.HasTarget())
                     {
                         float distanceToTarget = _enemy.AIComponent.GetDistanceToTarget();
                         
-                        // Check if in attack range
-                        if (_enemy.CombatComponent?.CurrentAttack != null)
+                        // Check if ANY attack is available at current distance
+                        // This is the proper way - don't assume CurrentAttack is still valid
+                        if (_enemy.CombatComponent != null)
                         {
-                            float attackRange = _enemy.CombatComponent.CurrentAttack.Range;
-                            if (distanceToTarget <= attackRange)
+                            var availableAttack = _enemy.CombatComponent.SelectAttack(distanceToTarget);
+                            if (availableAttack != null)
                             {
-                                _enemy._movementController.ChangeState(EnemyState.Attack);
+                                // Attack is available at this distance - go to Attack state
+                                GD.Print($"[KnockBackState] Knockback recovery → Attack (attack available at distance {distanceToTarget})");
+                                _enemy.AIComponent.ChangeState(EnemyState.Attack);
                             }
                             else
                             {
-                                _enemy._movementController.ChangeState(EnemyState.Chase);
+                                // No attack available, need to chase to get closer
+                                GD.Print($"[KnockBackState] Knockback recovery → Chase (no attack at distance {distanceToTarget})");
+                                _enemy.AIComponent.ChangeState(EnemyState.Chase);
                             }
                         }
                         else
                         {
-                            // No attack set, default to chase
-                            _enemy._movementController.ChangeState(EnemyState.Chase);
+                            // No combat component, default to chase
+                            _enemy.AIComponent.ChangeState(EnemyState.Chase);
                         }
                     }
                     else
                     {
                         // No target, return to idle/patrol
-                        _enemy._movementController.ChangeState(EnemyState.Idle);
+                        _enemy.AIComponent.ChangeState(EnemyState.Idle);
                     }
                 }
                 return;

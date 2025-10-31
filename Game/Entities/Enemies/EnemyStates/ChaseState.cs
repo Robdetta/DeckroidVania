@@ -11,6 +11,9 @@ namespace DeckroidVania.Game.Entities.Enemies.States
         private Node3D _target;
         private float _chaseSpeed;
         
+        public bool CanBeKnockedBack => true;  // Chasing can be knocked back
+        public bool CanTakeDamage => true;     // Takes full damage
+        
         public ChaseState(Enemy enemy, float chaseSpeed)
         {
             _enemy = enemy;
@@ -40,10 +43,9 @@ namespace DeckroidVania.Game.Entities.Enemies.States
             // NEW: Use AIComponent to check target
             if (_enemy?.AIComponent == null || !_enemy.AIComponent.HasTarget())
             {
-                // Use legacy controller for actual state change
-                if (_enemy?._movementController != null)
+                if (_enemy?.AIComponent != null)
                 {
-                    _enemy._movementController.ChangeState(EnemyState.Patrol);
+                    _enemy.AIComponent.ChangeState(EnemyState.Patrol);
                 }
                 
                 return;
@@ -65,9 +67,9 @@ namespace DeckroidVania.Game.Entities.Enemies.States
                     if (attack != null)
                     {
                         // We found an attack that works at this distance - switch to attack state
-                        if (_enemy?._movementController != null)
+                        if (_enemy?.AIComponent != null)
                         {
-                            _enemy._movementController.ChangeState(EnemyState.Attack);
+                            _enemy.AIComponent.ChangeState(EnemyState.Attack);
                         }
                         return;
                     }
@@ -88,6 +90,14 @@ namespace DeckroidVania.Game.Entities.Enemies.States
                 float velocityToSet = directionToTarget * _chaseSpeed;
                 _enemy.MovementComponent.SetHorizontalVelocity(velocityToSet);
                 _enemy.MovementComponent.FaceRight = (directionToTarget > 0);
+                
+                // Debug: Check if facing and velocity match
+                bool facingRight = _enemy.MovementComponent.FaceRight;
+                bool movingRight = velocityToSet > 0;
+                if (facingRight != movingRight)
+                {
+                    GD.PushWarning($"[ChaseState] ⚠️ MISMATCH! Facing: {(facingRight ? "RIGHT" : "LEFT")}, Moving: {(movingRight ? "RIGHT" : "LEFT")} (vel: {velocityToSet})");
+                }
             }
 
             // NEW: Update animation blend

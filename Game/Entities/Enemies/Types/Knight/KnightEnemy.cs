@@ -46,25 +46,15 @@ namespace DeckroidVania.Game.Entities.Enemies.Types
                 return;
             }
 
-            _movementController = new EnemyMovementController();
-            AddChild(_movementController);
-            _movementController.Initialize(
-                this,
-                _enemyData.Movement.PatrolSpeed,
-                _enemyData.Movement.PatrolRange,
-                _enemyData.Combat.ChaseSpeed,
-                _enemyData.Combat.AttackRange,
-                _enemyData.Vision.DetectionRange,
-                _enemyData.Vision.LoseTargetRange,
-                EnemyState.Patrol,  // Set Patrol as default state for Knight
-                _enemyData.Combat.DetectionBehavior,
-                _enemyData.Combat.AttackCooldown,
-                defaultAttack,
-                _enemyData.Combat.DefaultIdleState 
-
-
-
-            );
+            // Create AI state machine
+            if (AIComponent != null)
+            {
+                AIComponent.CreateStates(
+                    _enemyData.Movement.PatrolSpeed,
+                    _enemyData.Movement.PatrolRange,
+                    _enemyData.Combat.ChaseSpeed
+                );
+            }
         }
 
         private void LoadEnemyDefinition()
@@ -124,6 +114,15 @@ namespace DeckroidVania.Game.Entities.Enemies.Types
                 return _enemyData.Combat.KnockbackResistance;
             }
             return 1f; // Default if data not loaded
+        }
+        
+        protected override string GetDetectionBehavior()
+        {
+            if (_enemyData?.Combat != null && !string.IsNullOrEmpty(_enemyData.Combat.DetectionBehavior))
+            {
+                return _enemyData.Combat.DetectionBehavior;
+            }
+            return "chase"; // Knight defaults to chase
         }
 
     }

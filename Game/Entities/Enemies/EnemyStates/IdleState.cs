@@ -9,6 +9,9 @@ namespace DeckroidVania.Game.Entities.Enemies.States
     {
         private Enemy _enemy; // Direct reference to Enemy
         
+        public bool CanBeKnockedBack => true;  // Idle can be knocked back
+        public bool CanTakeDamage => true;     // Takes full damage
+        
         public IdleState(Enemy enemy)
         {
             _enemy = enemy;
