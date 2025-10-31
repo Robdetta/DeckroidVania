@@ -11,7 +11,7 @@
       "weight": 100
     },
     {
-      "id": "002_shield_bash",
+      "id": "002_block",
       "name": "Shield Bash",
       "type": "melee",
       "damage": 10,

@@ -56,27 +56,17 @@ namespace DeckroidVania.Game.Entities.Enemies.States
                     {
                         float distanceToTarget = _enemy.AIComponent.GetDistanceToTarget();
                         
-                        // Check if ANY attack is available at current distance
-                        // This is the proper way - don't assume CurrentAttack is still valid
-                        if (_enemy.CombatComponent != null)
+                        // Try to select an appropriate attack for current distance
+                        var selectedAttack = _enemy.CombatComponent?.SelectAttack(distanceToTarget);
+                        
+                        if (selectedAttack != null)
                         {
-                            var availableAttack = _enemy.CombatComponent.SelectAttack(distanceToTarget);
-                            if (availableAttack != null)
-                            {
-                                // Attack is available at this distance - go to Attack state
-                                GD.Print($"[KnockBackState] Knockback recovery → Attack (attack available at distance {distanceToTarget})");
-                                _enemy.AIComponent.ChangeState(EnemyState.Attack);
-                            }
-                            else
-                            {
-                                // No attack available, need to chase to get closer
-                                GD.Print($"[KnockBackState] Knockback recovery → Chase (no attack at distance {distanceToTarget})");
-                                _enemy.AIComponent.ChangeState(EnemyState.Chase);
-                            }
+                            // Attack is available at this distance
+                            _enemy.AIComponent.ChangeState(EnemyState.Attack);
                         }
                         else
                         {
-                            // No combat component, default to chase
+                            // No attack available, chase to get closer
                             _enemy.AIComponent.ChangeState(EnemyState.Chase);
                         }
                     }

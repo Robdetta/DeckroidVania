@@ -109,6 +109,14 @@ namespace DeckroidVania.Game.Entities.Enemies.Types
 
         protected override float GetKnockbackResistance()
         {
+            // FIRST check if blocking - complete immunity takes priority!
+            float baseResistance = base.GetKnockbackResistance();
+            if (baseResistance <= 0f)
+            {
+                return 0f; // 🛡️ Blocking = complete immunity
+            }
+            
+            // Otherwise use JSON-defined resistance
             if (_enemyData?.Combat != null)
             {
                 return _enemyData.Combat.KnockbackResistance;

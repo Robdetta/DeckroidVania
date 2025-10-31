@@ -28,9 +28,9 @@
         "maxDistance": 3,
         "attacks": [
           "001_sword_slash",
-          "002_shield_bash",
+          "002_block",
           "001_sword_slash",
-          "002_shield_bash"
+          "002_block"
         ]
       }
     }
