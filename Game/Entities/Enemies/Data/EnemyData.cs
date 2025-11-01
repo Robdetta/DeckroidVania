@@ -33,7 +33,6 @@ namespace DeckroidVania.Game.Entities.Enemies.Data
     public class VisionData
     {
         public float DetectionRange { get; set; }
-        public float LoseTargetRange { get; set; }
     }
 
     [Serializable]
@@ -59,7 +58,8 @@ namespace DeckroidVania.Game.Entities.Enemies.Data
     {
         public float OptimalRangeMin { get; set; }      // Too close - back away
         public float OptimalRangeMax { get; set; }      // Ideal attack range
-        public float LoseTargetRange { get; set; }      // Give up chase beyond this
         public bool RepositioningEnabled { get; set; }  // Enable movement to maintain range
+        public float MeleeAggressiveness { get; set; }  // 0.0-1.0: How often to melee when close (0.0=never, 1.0=always)
+        public float BackAwayChance { get; set; }       // 0.0-1.0: How often to back away vs stand ground (0.0=stand, 1.0=always run)
     }
 }

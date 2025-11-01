@@ -11,10 +11,10 @@
     "patrolRange": 20
   },
   "vision": {
-    "detectionRange": 5
+    "detectionRange": 10
   },
   "combat": {
-    "chaseSpeed": 10,
+    "chaseSpeed": 4,
     "attackRange": 1,
     "attackCooldown": 1.5,
     "knockbackResistance": 0.3,
@@ -24,8 +24,9 @@
     "spatialBehavior": {
       "optimalRangeMin": 2,
       "optimalRangeMax": 5,
-      "loseTargetRange": 80,
-      "repositioningEnabled": false
+      "repositioningEnabled": false,
+      "meleeAggressiveness": 1.0,
+      "backAwayChance": 0.0
     },
     "attackRanges": {
       "melee": {

@@ -11,7 +11,9 @@ namespace DeckroidVania.Game.Entities.Enemies.States
     {
         private Enemy _enemy; // Direct reference to Enemy (component orchestrator)
         private EnemyAttackData _currentAttack; 
-        private float _attackTimer;
+        private float _stateEnteredTime = 0f;        // Time since entering this state
+        private float _cooldownTimer = 0f;           // Cooldown between attacks
+        private float _minimumAttackDuration = 0.2f; // Minimum time to stay in attack state after hitting
         
         // State properties
         public bool CanBeKnockedBack => true;  // Attacking can be interrupted
@@ -50,7 +52,8 @@ namespace DeckroidVania.Game.Entities.Enemies.States
                 _enemy.MovementComponent.SetHorizontalVelocity(0f);
             }
             
-            _attackTimer = 0f;
+            _stateEnteredTime = 0f;
+            _cooldownTimer = 0f;
             
             // NEW: Use AnimationComponent
             if (_enemy?.AnimationComponent != null)
@@ -72,6 +75,9 @@ namespace DeckroidVania.Game.Entities.Enemies.States
             if (_currentAttack == null) 
                 return;
 
+            // Track how long we've been in attack state
+            _stateEnteredTime += (float)delta;
+
             // NEW: Use AIComponent to check for target
             if (_enemy?.AIComponent == null || !_enemy.AIComponent.HasTarget())
             {
@@ -85,12 +91,15 @@ namespace DeckroidVania.Game.Entities.Enemies.States
             // Check if target is STILL in range for our current attack
             // Add a small buffer (1.5x range) to prevent immediate chase-attack loop
             float effectiveRange = _currentAttack.Range * 1.5f;
-            if (distanceToTarget > effectiveRange)
+            
+            // Don't exit attack state immediately after hitting - give it minimum duration
+            if (distanceToTarget > effectiveRange && _stateEnteredTime > _minimumAttackDuration)
             {
                 // Always return to Chase to re-evaluate attacks at new distance
                 // Once in Chase state, it will re-enter Attack when in range again
                 if (_enemy?.AIComponent != null)
                 {
+                    GD.Print($"[AttackState] Out of range ({distanceToTarget:F1}m > {effectiveRange:F1}m) and minimum duration passed - returning to Chase");
                     _enemy.AIComponent.ChangeState(EnemyState.Chase);
                 }
                 
@@ -110,9 +119,9 @@ namespace DeckroidVania.Game.Entities.Enemies.States
             }
 
             // Attack cooldown timer
-            if (_attackTimer > 0f)
+            if (_cooldownTimer > 0f)
             {
-                _attackTimer -= (float)delta;
+                _cooldownTimer -= (float)delta;
             }
             else
             {
@@ -120,7 +129,7 @@ namespace DeckroidVania.Game.Entities.Enemies.States
                 if (_enemy?.CombatComponent?.CanAttack ?? false)
                 {
                     PerformAttack();
-                    _attackTimer = _currentAttack.Cooldown;
+                    _cooldownTimer = _currentAttack.Cooldown;
                 }
             }
         }

@@ -26,6 +26,9 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
         [Export]
         public float Gravity { get; set; } = 800f; // Gravity strength
         
+        // Store the enemy data for access by states
+        public Data.EnemyData EnemyData { get; protected set; }
+        
         // ===== ECS COMPONENTS =====
         public Components.Interfaces.IHealthComponent HealthComponent { get; protected set; }
         public IMovementComponent MovementComponent { get; protected set; }
@@ -53,6 +56,9 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
                 GD.PushError("[Enemy] Cannot initialize components - enemyData is null!");
                 return;
             }
+            
+            // Store the enemy data for states to access
+            EnemyData = enemyData;
             
             GD.Print("[Enemy] ═══════════════════════════════════════");
             GD.Print($"[Enemy] Initializing ECS Components for {enemyData.Name}");
