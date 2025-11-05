@@ -81,5 +81,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.1414, 3.10423, 0)
 
 [node name="EnemyMarkers" type="Node" parent="."]
 
-[node name="Marker2" type="Marker3D" parent="EnemyMarkers"]
+[node name="Marker3" type="Marker3D" parent="EnemyMarkers"]
 transform = Transform3D(-0.451158, 0, -0.892445, 0, 1, 0, 0.892445, 0, -0.451158, -21.8099, 0.0926089, -0.176047)

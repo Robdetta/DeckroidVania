@@ -1,0 +1,104 @@
+using Godot;
+using System;
+
+namespace DeckroidVania.Game.Combat.Hitbox
+{
+    public partial class HitboxComponent : Node3D
+    {
+        private Area3D _hitboxArea;
+        private CollisionShape3D _collisionShape;
+        private BoxShape3D _boxShape;
+        private HitboxData _data;
+        private float _lifetimeRemaining;
+        private bool _enabled = false;
+        private string _targetGroup = "Player";
+
+        public void Initialize(HitboxData data, string targetGroup = "Player")
+        {
+            _data = data;
+            _targetGroup = targetGroup;
+            _lifetimeRemaining = data.Lifetime;
+
+            // Create Area3D dynamically
+            _hitboxArea = new Area3D();
+            _hitboxArea.Name = "HitboxArea";
+            AddChild(_hitboxArea);
+
+            // Create CollisionShape3D
+            _collisionShape = new CollisionShape3D();
+            _hitboxArea.AddChild(_collisionShape);
+
+            // Create and configure box shape
+            _boxShape = new BoxShape3D();
+            _boxShape.Size = data.Size;
+            _collisionShape.Shape = _boxShape;
+
+            // Set position offset (relative to parent enemy)
+            Position = data.Offset;
+
+            // Connect signals
+            _hitboxArea.BodyEntered += OnBodyEntered;
+
+            // Enable immediately
+            Enable();
+
+            GD.Print($"[HitboxComponent] ✓ Spawned hitbox - Size: {data.Size}, Offset: {data.Offset}, Damage: {data.Damage}, Lifetime: {data.Lifetime}s");
+        }
+
+        public override void _Process(double delta)
+        {
+            if (!_enabled) return;
+
+            _lifetimeRemaining -= (float)delta;
+
+            if (_lifetimeRemaining <= 0)
+            {
+                GD.Print("[HitboxComponent] ⏱️ Lifetime expired, destroying hitbox");
+                QueueFree();
+            }
+        }
+
+        public void Enable()
+        {
+            if (_hitboxArea == null) return;
+            _enabled = true;
+            _hitboxArea.Monitoring = true;
+            _hitboxArea.Visible = true;
+            GD.Print($"[HitboxComponent] ✓ Enabled");
+        }
+
+        public void Disable()
+        {
+            if (_hitboxArea == null) return;
+            _enabled = false;
+            _hitboxArea.Monitoring = false;
+            _hitboxArea.Visible = false;
+            GD.Print($"[HitboxComponent] ✗ Disabled");
+        }
+
+        private void OnBodyEntered(Node3D body)
+        {
+            if (!_enabled) return;
+            if (!body.IsInGroup(_targetGroup)) return;
+
+            GD.Print($"[HitboxComponent] 💥 HIT! Dealing {_data.Damage} damage to {body.Name}");
+
+            // Deal damage
+            if (body.HasMethod("TakeDamage"))
+            {
+                body.Call("TakeDamage", _data.Damage);
+            }
+
+            // Destroy hitbox after hit (can make this configurable later)
+            QueueFree();
+        }
+
+        public override void _ExitTree()
+        {
+            if (_hitboxArea != null)
+            {
+                _hitboxArea.BodyEntered -= OnBodyEntered;
+            }
+        }
+    }
+}

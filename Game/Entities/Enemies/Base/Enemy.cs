@@ -4,6 +4,7 @@ using DeckroidVania.Game.Entities.Enemies.Controllers;
 using DeckroidVania.Game.Entities.Enemies.States;
 using DeckroidVania.Game.Entities.Enemies.Components;
 using DeckroidVania.Game.Entities.Enemies.Components.Interfaces;
+using DeckroidVania.Game.Combat.Hitbox;
 
 namespace DeckroidVania.Game.Entities.Enemies.Base
 
@@ -46,6 +47,41 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
             // Components will be initialized by derived classes after loading JSON data
         }
         
+        public void SpawnHitbox(string configId)
+        {
+            GD.Print($"[Enemy] SpawnHitbox called with configId: '{configId}'");
+            
+            var hitboxData = HitboxConfigLoader.LoadHitboxConfig(configId);
+            
+            var hitboxComponent = new HitboxComponent();
+            AddChild(hitboxComponent);
+            hitboxComponent.Initialize(hitboxData, "Player");
+            
+            GD.Print($"[Enemy] ✓ Spawned hitbox for '{configId}'");
+        }
+        
+        public void EnableMeleeHitbox()
+        {
+            GD.Print("[Enemy] EnableMeleeHitbox - spawning sword_slash hitbox");
+            SpawnHitbox("sword_slash");
+        }
+
+        public void DisableMeleeHitbox()
+        {
+            GD.Print("[Enemy] DisableMeleeHitbox called (hitbox auto-destroys)");
+        }
+
+        public void EnableBlockHitbox()
+        {
+            GD.Print("[Enemy] EnableBlockHitbox - spawning block_counter hitbox");
+            SpawnHitbox("block_counter");
+        }
+
+        public void DisableBlockHitbox()
+        {
+            GD.Print("[Enemy] DisableBlockHitbox called (hitbox auto-destroys)");
+        }
+
         /// <summary>
         /// Initialize all ECS components - call this after loading enemy data from JSON
         /// </summary>
@@ -447,7 +483,7 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
             {
                 return 0f; // 🛡️ COMPLETE IMMUNITY while blocking!
             }
-            
+
             return 1f; // Default: no resistance
         }
     }
