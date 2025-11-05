@@ -1,5 +1,6 @@
 using DeckroidVania2.Game.Player.PlayerStates;
 using DeckroidVania2.Game.Scripts.Inputs;
+using DeckroidVania.Game.Combat.Hitbox;
 using Godot;
 using System;
 
@@ -200,6 +201,19 @@ public partial class Player : CharacterBody3D
     {
         GD.Print("SpawnAttackProjectile called from animation event!");
         _attackManager.FireProjectile();
+    }
+
+    public void SpawnAttackHitbox(string configId)
+    {
+        GD.Print($"[Player] SpawnAttackHitbox called with configId: '{configId}'");
+        
+        var hitboxData = HitboxConfigLoader.LoadHitboxConfig(configId);
+        
+        var hitboxComponent = new HitboxComponent();
+        AddChild(hitboxComponent);
+        hitboxComponent.Initialize(hitboxData, "Enemy");
+        
+        GD.Print($"[Player] ✓ Spawned attack hitbox for '{configId}'");
     }
 
     private void ForceCancelAttack()
