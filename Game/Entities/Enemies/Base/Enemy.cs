@@ -49,8 +49,6 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
         
         public void SpawnHitbox(string configId)
         {
-            GD.Print($"[Enemy] SpawnHitbox called with configId: '{configId}'");
-            
             var hitboxData = HitboxConfigLoader.LoadHitboxConfig(configId);
             
             // Find the Visual/Knight node (or just Visual if Knight doesn't exist)
@@ -58,46 +56,36 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
             if (visualNode == null)
             {
                 visualNode = GetNodeOrNull<Node3D>("Visual");
-                GD.Print("[Enemy] Using Visual node as parent");
-            }
-            else
-            {
-                GD.Print("[Enemy] Using Visual/Knight node as parent");
             }
             
             if (visualNode == null)
             {
-                GD.PrintErr("[Enemy] ✗ Could not find Visual or Visual/Knight node!");
                 return;
             }
             
             var hitboxComponent = new HitboxComponent();
             visualNode.AddChild(hitboxComponent);  // Add to Visual/Knight instead of Enemy root
             hitboxComponent.Initialize(hitboxData, "Player");
-            
-            GD.Print($"[Enemy] ✓ Spawned hitbox for '{configId}' under {visualNode.Name}");
         }
         
         public void EnableMeleeHitbox()
         {
-            GD.Print("[Enemy] EnableMeleeHitbox - spawning sword_slash hitbox");
             SpawnHitbox("sword_slash");
         }
 
         public void DisableMeleeHitbox()
         {
-            GD.Print("[Enemy] DisableMeleeHitbox called (hitbox auto-destroys)");
+            // Hitbox auto-destroys
         }
 
         public void EnableBlockHitbox()
         {
-            GD.Print("[Enemy] EnableBlockHitbox - spawning block_counter hitbox");
             SpawnHitbox("block_counter");
         }
 
         public void DisableBlockHitbox()
         {
-            GD.Print("[Enemy] DisableBlockHitbox called (hitbox auto-destroys)");
+            // Hitbox auto-destroys
         }
 
         /// <summary>
