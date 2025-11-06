@@ -22,6 +22,10 @@ namespace DeckroidVania.Game.Combat.Hitbox
             _targetGroup = targetGroup;
             _lifetimeRemaining = data.Lifetime;
 
+            GD.Print($"\n[HitboxComponent] ═══ HITBOX INITIALIZATION ═══");
+            GD.Print($"[HitboxComponent] Parent: {GetParent()?.Name} at {GetParent<Node3D>()?.GlobalPosition}");
+            GD.Print($"[HitboxComponent] Offset: {data.Offset} | Size: {data.Size} | Damage: {data.Damage}");
+
             // Create Area3D dynamically
             _hitboxArea = new Area3D();
             _hitboxArea.Name = "HitboxArea";
@@ -54,42 +58,14 @@ namespace DeckroidVania.Game.Combat.Hitbox
             material.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
             _debugMesh.SetSurfaceOverrideMaterial(0, material);
 
-            // Set position offset with direction correction
-            Vector3 adjustedOffset = data.Offset;
+            // Set position offset - parent node handles rotation/direction automatically
+            // Since we're now a child of Visual/Knight node, its rotation transforms our local offset correctly
+            // No need to manually flip Z-axis - the parent's 180° rotation does it for us!
+            Position = data.Offset;
+            GD.Print($"[HitboxComponent] ▶ HitboxComponent.Position set to: {Position} (parent handles direction)");
             
-            if (GetParent() is Enemy enemy)
-            {
-                // Try to get facing direction from Enemy's MovementComponent
-                IMovementComponent movementComp = enemy.MovementComponent;
-                if (movementComp != null)
-                {
-                    bool isFacingRight = movementComp.FaceRight;
-                    
-                    if (!isFacingRight)
-                    {
-                        adjustedOffset.Z *= -1; // Flip Z offset for left-facing
-                    }
-                    GD.Print($"[HitboxComponent] Enemy FaceRight: {isFacingRight}, Final Offset: {adjustedOffset}");
-                }
-                else
-                {
-                    // Fallback: check Visual node rotation
-                    Node3D visualNode = enemy.GetNodeOrNull<Node3D>("Visual");
-                    if (visualNode != null)
-                    {
-                        float rotationY = visualNode.Rotation.Y;
-                        bool isFacingLeft = Mathf.Abs(rotationY) > Mathf.Pi * 0.5f;
-                        
-                        if (isFacingLeft)
-                        {
-                            adjustedOffset.Z *= -1;
-                        }
-                        GD.Print($"[HitboxComponent] Fallback - Rotation Y: {rotationY:F4}, Facing Left: {isFacingLeft}, Final Offset: {adjustedOffset}");
-                    }
-                }
-            }
-            
-            Position = adjustedOffset;
+            // Debug: Print final global position after being added to scene
+            CallDeferred(nameof(PrintGlobalPosition));
 
             // Connect signals
             _hitboxArea.BodyEntered += OnBodyEntered;
@@ -136,35 +112,45 @@ namespace DeckroidVania.Game.Combat.Hitbox
             if (!_enabled) return;
             if (!body.IsInGroup(_targetGroup)) return;
 
-            GD.Print($"[HitboxComponent] 💥 HIT! Dealing {_data.Damage} damage to {body.Name}");
+            GD.Print($"[HitboxComponent] 💥 HIT! Target: {body.Name} (Group: {_targetGroup})");
 
-            // Get the attacker position (parent position)
-            Vector3 attackerPos = GetParent<Node3D>()?.GlobalPosition ?? GlobalPosition;
-
-            // Deal damage based on target type
-            if (body.HasMethod("TakeDamage"))
+            // Apply damage based on target group (similar to DamageZone pattern)
+            if (body.IsInGroup("Player"))
             {
-                // Check if it's an enemy (has TakeDamage with knockback parameters)
-                if (body.IsInGroup("Enemy"))
+                // Player uses HealthSystem singleton
+                if (HealthSystem.Instance != null)
                 {
-                    // Enemy TakeDamage: (int amount, float knockbackForce, float knockbackDuration, Vector3 attackerPosition)
-                    body.Call("TakeDamage", _data.Damage, 50f, 0.3f, attackerPos);
-                    GD.Print($"[HitboxComponent] ✓ Applied enemy damage with knockback");
+                    HealthSystem.Instance.TakeDamage(_data.Damage);
+                    GD.Print($"[HitboxComponent] ✓ Dealt {_data.Damage} damage to Player via HealthSystem");
                 }
-                else if (body.IsInGroup("Player"))
+                else
                 {
-                    // Player uses HealthSystem - just apply raw damage
-                    body.Call("TakeDamage", _data.Damage);
-                    GD.Print($"[HitboxComponent] ✓ Applied player damage");
+                    GD.PrintErr("[HitboxComponent] ✗ HealthSystem.Instance is null!");
                 }
             }
-            else
+            else if (body.IsInGroup("Enemy"))
             {
-                GD.PrintErr($"[HitboxComponent] ✗ {body.Name} has no TakeDamage method!");
+                // Enemy has TakeDamage method with knockback
+                if (body.HasMethod("TakeDamage"))
+                {
+                    Vector3 attackerPos = GetParent<Node3D>()?.GlobalPosition ?? GlobalPosition;
+                    body.Call("TakeDamage", _data.Damage, 50f, 0.3f, attackerPos);
+                    GD.Print($"[HitboxComponent] ✓ Dealt {_data.Damage} damage to Enemy with knockback");
+                }
+                else
+                {
+                    GD.PrintErr($"[HitboxComponent] ✗ Enemy {body.Name} has no TakeDamage method!");
+                }
             }
 
             // Destroy hitbox after hit (can make this configurable later)
+            GD.Print("[HitboxComponent] 🗑️ Destroying hitbox after hit");
             QueueFree();
+        }
+
+        private void PrintGlobalPosition()
+        {
+            GD.Print($"[HitboxComponent] ✓ Active at GlobalPosition: {GlobalPosition}\n");
         }
 
         public override void _ExitTree()
