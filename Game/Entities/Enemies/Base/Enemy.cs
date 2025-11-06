@@ -4,6 +4,7 @@ using DeckroidVania.Game.Entities.Enemies.Controllers;
 using DeckroidVania.Game.Entities.Enemies.States;
 using DeckroidVania.Game.Entities.Enemies.Components;
 using DeckroidVania.Game.Entities.Enemies.Components.Interfaces;
+using DeckroidVania.Game.Entities.Enemies.Data;
 using DeckroidVania.Game.Combat.Hitbox;
 
 namespace DeckroidVania.Game.Entities.Enemies.Base
@@ -47,6 +48,45 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
             // Components will be initialized by derived classes after loading JSON data
         }
         
+        /// <summary>
+        /// Spawn hitbox from consolidated EnemyAttackData (new approach)
+        /// </summary>
+        public void SpawnHitbox(EnemyAttackData attackData)
+        {
+            if (attackData?.Hitbox == null)
+            {
+                return;
+            }
+
+            // Build HitboxData from attack data
+            var hitboxData = new HitboxData
+            {
+                Size = attackData.Hitbox.SizeVec,
+                Offset = attackData.Hitbox.OffsetVec,
+                Lifetime = attackData.Hitbox.Lifetime,
+                Damage = attackData.Damage
+            };
+
+            // Find the Visual/Knight node
+            Node3D visualNode = GetNodeOrNull<Node3D>("Visual/Knight");
+            if (visualNode == null)
+            {
+                visualNode = GetNodeOrNull<Node3D>("Visual");
+            }
+
+            if (visualNode == null)
+            {
+                return;
+            }
+
+            var hitboxComponent = new HitboxComponent();
+            visualNode.AddChild(hitboxComponent);
+            hitboxComponent.Initialize(hitboxData, "Player");
+        }
+        
+        /// <summary>
+        /// Spawn hitbox from config ID (legacy approach - kept for backwards compatibility)
+        /// </summary>
         public void SpawnHitbox(string configId)
         {
             var hitboxData = HitboxConfigLoader.LoadHitboxConfig(configId);
