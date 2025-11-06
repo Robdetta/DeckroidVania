@@ -3,7 +3,7 @@
   "name": "Dark Knight",
   "type": "knight",
   "health": {
-    "maxHealth": 40,
+    "maxHealth": 30,
     "healthRegen": 0
   },
   "movement": {
