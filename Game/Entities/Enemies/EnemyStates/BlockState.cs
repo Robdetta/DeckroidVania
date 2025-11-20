@@ -64,17 +64,17 @@ namespace DeckroidVania.Game.Entities.Enemies.States
             }
             
             // Block duration expired - return to appropriate state
-            if (_blockTimer <= 0f && _enemy?.AIComponent != null)
+            if (_blockTimer <= 0f && _enemy?.StateManagerComponent != null)
             {
-                if (_enemy.AIComponent.HasTarget())
+                if (_enemy.StateManagerComponent.HasTarget())
                 {
                     // Return to attack if still have target
-                    _enemy.AIComponent.ChangeState(EnemyState.Attack);
+                    _enemy.StateManagerComponent.ChangeState(EnemyState.Attack);
                 }
                 else
                 {
                     // Return to patrol if no target
-                    _enemy.AIComponent.ChangeState(EnemyState.Patrol);
+                    _enemy.StateManagerComponent.ChangeState(EnemyState.Patrol);
                 }
             }
         }

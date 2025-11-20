@@ -49,12 +49,12 @@ namespace DeckroidVania.Game.Entities.Enemies.States
             if (_knockbackTimer <= 0)
             {
                 // Return to appropriate state based on whether we have a target
-                if (_enemy?.AIComponent != null)
+                if (_enemy?.StateManagerComponent != null)
                 {
                     // If we have a target, return to combat (Chase or Attack)
-                    if (_enemy.AIComponent.HasTarget())
+                    if (_enemy.StateManagerComponent.HasTarget())
                     {
-                        float distanceToTarget = _enemy.AIComponent.GetDistanceToTarget();
+                        float distanceToTarget = _enemy.StateManagerComponent.GetDistanceToTarget();
                         
                         // Try to select an appropriate attack for current distance
                         var selectedAttack = _enemy.CombatComponent?.SelectAttack(distanceToTarget);
@@ -62,18 +62,18 @@ namespace DeckroidVania.Game.Entities.Enemies.States
                         if (selectedAttack != null)
                         {
                             // Attack is available at this distance
-                            _enemy.AIComponent.ChangeState(EnemyState.Attack);
+                            _enemy.StateManagerComponent.ChangeState(EnemyState.Attack);
                         }
                         else
                         {
                             // No attack available, chase to get closer
-                            _enemy.AIComponent.ChangeState(EnemyState.Chase);
+                            _enemy.StateManagerComponent.ChangeState(EnemyState.Chase);
                         }
                     }
                     else
                     {
                         // No target, return to idle/patrol
-                        _enemy.AIComponent.ChangeState(EnemyState.Idle);
+                        _enemy.StateManagerComponent.ChangeState(EnemyState.Idle);
                     }
                 }
                 return;

@@ -2,40 +2,71 @@ using Godot;
 using System.Collections.Generic;
 using DeckroidVania.Game.Entities.Enemies.Components.Interfaces;
 using DeckroidVania.Game.Entities.Enemies.Data;
+using DeckroidVania.Game.Entities.Enemies.Base;
 
 namespace DeckroidVania.Game.Entities.Enemies.Components
 {
     /// <summary>
     /// Handles all combat-related functionality for enemies
-    /// Responsibilities: attack selection, execution, cooldowns, damage dealing
+    /// Now uses AIBehaviorComponent for intelligent attack selection
     /// </summary>
     public partial class CombatComponent : Node, ICombatComponent
     {
         private AttackRanges _attackRanges;
-        private Dictionary<string, int> _attackRotationIndex = new Dictionary<string, int>();
-        private float _timeSinceLastAttack = 999f; // Start ready to attack
+        private float _attackCooldown;
+        private float _timeSinceLastAttack = 999f;
+        private Enemy _enemy;
+        
+        // NEW: AI Behavior Component
+        private IAIBehaviorComponent _aiBehavior;
         
         public float AttackCooldown { get; private set; }
         public bool CanAttack => _timeSinceLastAttack >= AttackCooldown;
         public EnemyAttackData CurrentAttack { get; private set; }
 
-        public void Initialize(AttackRanges attackRanges, float cooldown)
+        public void Initialize(Enemy enemy, CombatData combatData)
         {
-            _attackRanges = attackRanges;
-            AttackCooldown = cooldown;
+            _enemy = enemy;
+            _attackRanges = combatData.AttackRanges;
+            _attackCooldown = combatData.AttackCooldown;
+            AttackCooldown = _attackCooldown;
+            
+            GD.Print("[CombatComponent] Starting initialization...");
+
+            // Initialize AI Behavior Component
+            _aiBehavior = new AIBehaviorComponent();
+            AddChild((Node)_aiBehavior);
+            
+            // Get melee attack pattern and pass to AI behavior
+            if (combatData.AttackRanges?.Melee != null && combatData.AttackRanges.Melee.Attacks.Count > 0)
+            {
+                GD.Print($"[CombatComponent] Initializing AIBehavior with {combatData.AttackRanges.Melee.Attacks.Count} attacks");
+                GD.Print($"[CombatComponent] AIBehavior config: {combatData.AIBehavior != null}");
+                
+                _aiBehavior.Initialize(
+                    enemy,
+                    combatData.AttackRanges.Melee.Attacks,
+                    combatData.AIBehavior?.ToDictionary()
+                );
+            }
+            else
+            {
+                GD.PushError("[CombatComponent] No melee attacks found!");
+            }
+    
             
             GD.Print("[CombatComponent] ═════════════════════════════════════");
             GD.Print("[CombatComponent] Initialized with AttackRanges:");
-            if (attackRanges?.Melee != null && attackRanges.Melee.Attacks.Count > 0)
+            if (_attackRanges?.Melee != null && _attackRanges.Melee.Attacks.Count > 0)
             {
-                GD.Print($"[CombatComponent]   Melee ({attackRanges.Melee.MinDistance}-{attackRanges.Melee.MaxDistance}m):");
-                foreach (var attackId in attackRanges.Melee.Attacks)
+                GD.Print($"[CombatComponent]   Melee ({_attackRanges.Melee.MinDistance}-{_attackRanges.Melee.MaxDistance}m):");
+                foreach (var attackId in _attackRanges.Melee.Attacks)
                     GD.Print($"[CombatComponent]     - {attackId}");
             }
-            if (attackRanges?.Ranged != null && attackRanges.Ranged.Attacks.Count > 0)
+            if (_attackRanges?.Ranged != null && _attackRanges.Ranged.Attacks.Count > 0)
             {
-                GD.Print($"[CombatComponent]   Ranged ({attackRanges.Ranged.MinDistance}-{attackRanges.Ranged.MaxDistance}m):");
-                foreach (var attackId in attackRanges.Ranged.Attacks)
+                GD.Print($"[CombatComponent]   Ranged ({_attackRanges.Ranged.MinDistance}-{_attackRanges.Ranged.MaxDistance}m):");
+                foreach (var attackId in _attackRanges.Ranged.Attacks)
                     GD.Print($"[CombatComponent]     - {attackId}");
             }
             GD.Print("[CombatComponent] ═════════════════════════════════════");
@@ -75,40 +106,43 @@ namespace DeckroidVania.Game.Entities.Enemies.Components
             else
             {
                 GD.Print($"[CombatComponent] ❌ OUT OF RANGE");
-                GD.Print($"[CombatComponent]    Melee: {_attackRanges.Melee?.MinDistance ?? 0}-{_attackRanges.Melee?.MaxDistance ?? 0}m");
-                GD.Print($"[CombatComponent]    Ranged: {_attackRanges.Ranged?.MinDistance ?? 0}-{_attackRanges.Ranged?.MaxDistance ?? 0}m");
+                return null;
             }
 
             if (applicableRange == null || applicableRange.Attacks.Count == 0)
             {
-                // No attack available at this distance - this is normal during chase
                 return null;
             }
 
-            // Get or create rotation index for this range
-            if (!_attackRotationIndex.ContainsKey(rangeName))
-                _attackRotationIndex[rangeName] = 0;
+            // Get player health (TODO: implement actual player reference)
+            int playerHealth = 100;
+            int enemyHealth = _enemy?.HealthComponent?.CurrentHealth ?? 40;
 
-            // Get current attack and rotate to next
-            int currentIndex = _attackRotationIndex[rangeName];
-            string attackId = applicableRange.Attacks[currentIndex];
-            
-            // Advance to next attack (cycle through)
-            _attackRotationIndex[rangeName] = (currentIndex + 1) % applicableRange.Attacks.Count;
+            // Use AI Behavior to decide which attack
+            string chosenAttackId = _aiBehavior.DecideAttack(
+                distanceToTarget,
+                playerHealth,
+                enemyHealth
+            );
 
-            CurrentAttack = AttackDatabase.GetAttack(attackId);
+            if (string.IsNullOrEmpty(chosenAttackId))
+            {
+                GD.PushError("[CombatComponent] AI Behavior returned null attack!");
+                return null;
+            }
+
+            CurrentAttack = AttackDatabase.GetAttack(chosenAttackId);
             
             if (CurrentAttack != null)
             {
                 GD.Print($"[CombatComponent] 🎲 Selected {rangeName} attack:");
                 GD.Print($"[CombatComponent]    Name: {CurrentAttack.Name}");
-                GD.Print($"[CombatComponent]    ID: {attackId}");
+                GD.Print($"[CombatComponent]    ID: {chosenAttackId}");
                 GD.Print($"[CombatComponent]    Animation: {CurrentAttack.AnimationName}");
-                GD.Print($"[CombatComponent]    Type: {CurrentAttack.Type}");
             }
             else
             {
-                GD.PushError($"[CombatComponent] ❌ Attack '{attackId}' not found in database!");
+                GD.PushError($"[CombatComponent] ❌ Attack '{chosenAttackId}' not found in database!");
             }
             
             GD.Print($"[CombatComponent] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -131,10 +165,6 @@ namespace DeckroidVania.Game.Entities.Enemies.Components
             }
 
             GD.Print($"[CombatComponent] ⚔️ Executing: {CurrentAttack.Name}");
-            GD.Print($"[CombatComponent]   Damage: {CurrentAttack.Damage}, Type: {CurrentAttack.Type}");
-            GD.Print($"[CombatComponent]   Animation: {CurrentAttack.AnimationName}");
-            
-            // Reset cooldown
             _timeSinceLastAttack = 0f;
         }
 
@@ -146,6 +176,14 @@ namespace DeckroidVania.Game.Entities.Enemies.Components
         public void ResetCooldown()
         {
             _timeSinceLastAttack = 0f;
+        }
+        
+        /// <summary>
+        /// Reset AI behavior when target is lost
+        /// </summary>
+        public void ResetAIBehavior()
+        {
+            _aiBehavior?.Reset();
         }
     }
 }

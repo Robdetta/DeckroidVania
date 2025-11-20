@@ -48,20 +48,20 @@ namespace DeckroidVania.Game.Entities.Enemies.States
             {
                 _decisionTimer -= (float)delta;
             }
-            
-            // NEW: Use AIComponent to check target
-            if (_enemy?.AIComponent == null || !_enemy.AIComponent.HasTarget())
+
+            // NEW: Use StateManagerComponent to check target
+            if (_enemy?.StateManagerComponent == null || !_enemy.StateManagerComponent.HasTarget())
             {
-                if (_enemy?.AIComponent != null)
+                if (_enemy?.StateManagerComponent != null)
                 {
-                    _enemy.AIComponent.ChangeState(EnemyState.Patrol);
+                    _enemy.StateManagerComponent.ChangeState(EnemyState.Patrol);
                 }
                 
                 return;
             }
 
-            _target = _enemy.AIComponent.CurrentTarget;
-            float distanceToTarget = _enemy.AIComponent.GetDistanceToTarget();
+            _target = _enemy.StateManagerComponent.CurrentTarget;
+            float distanceToTarget = _enemy.StateManagerComponent.GetDistanceToTarget();
 
             // Check spatial behavior configuration
             var spatialBehavior = _enemy?.EnemyData?.Combat?.SpatialBehavior;
@@ -101,7 +101,7 @@ namespace DeckroidVania.Game.Entities.Enemies.States
                         {
                             GD.Print($"[ChaseState] ⚡ EXECUTING MELEE");
                             _enemy.MovementComponent.SetHorizontalVelocity(0f);
-                            _enemy.AIComponent.ChangeState(EnemyState.Attack);
+                            _enemy.StateManagerComponent.ChangeState(EnemyState.Attack);
                             return;
                         }
                         else
@@ -143,7 +143,7 @@ namespace DeckroidVania.Game.Entities.Enemies.States
                         if (attack != null)
                         {
                             _enemy.MovementComponent.SetHorizontalVelocity(0f);
-                            _enemy.AIComponent.ChangeState(EnemyState.Attack);
+                            _enemy.StateManagerComponent.ChangeState(EnemyState.Attack);
                             return;
                         }
                     }
@@ -176,7 +176,7 @@ namespace DeckroidVania.Game.Entities.Enemies.States
                 {
                     GD.Print($"[ChaseState] ✅ Attack found at {distanceToTarget:F1}m");
                     _enemy.MovementComponent.SetHorizontalVelocity(0f);
-                    _enemy.AIComponent.ChangeState(EnemyState.Attack);
+                    _enemy.StateManagerComponent.ChangeState(EnemyState.Attack);
                     return;
                 }
             }

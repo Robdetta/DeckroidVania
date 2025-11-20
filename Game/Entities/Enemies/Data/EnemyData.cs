@@ -47,12 +47,14 @@ namespace DeckroidVania.Game.Entities.Enemies.Data
         public string DefaultIdleState {get; set; }
         public AttackRanges AttackRanges { get; set; } // NEW: Range-based attack selection
         public SpatialBehaviorData SpatialBehavior { get; set; } // NEW: Three-zone behavior system
+        public AIBehaviorData AIBehavior { get; set; } = new();
+        
     }
     
-    /// <summary>
+
     /// Defines spatial behavior zones for intelligent enemy positioning
     /// Used by ChaseState to decide: back away, hold position, or chase closer
-    /// </summary>
+
     [Serializable]
     public class SpatialBehaviorData
     {
@@ -61,5 +63,33 @@ namespace DeckroidVania.Game.Entities.Enemies.Data
         public bool RepositioningEnabled { get; set; }  // Enable movement to maintain range
         public float MeleeAggressiveness { get; set; }  // 0.0-1.0: How often to melee when close (0.0=never, 1.0=always)
         public float BackAwayChance { get; set; }       // 0.0-1.0: How often to back away vs stand ground (0.0=stand, 1.0=always run)
+    }
+
+
+
+    /// Holds AI behavior configuration loaded from JSON
+
+    public class AIBehaviorData
+    {
+        public int MaxConsecutiveAttacks { get; set; } = 3;
+        public float BlockCooldown { get; set; } = 2.0f;
+        public float DefensiveHealthThreshold { get; set; } = 0.35f;
+        public float DefensiveBlockCooldownMultiplier { get; set; } = 0.75f;
+        public bool AllowRandomAttackSelection { get; set; } = true;
+        
+        /// <summary>
+        /// Convert to Dictionary for passing to AIBehaviorComponent
+        /// </summary>
+        public Dictionary<string, dynamic> ToDictionary()
+        {
+            return new Dictionary<string, dynamic>
+            {
+                { "maxConsecutiveAttacks", MaxConsecutiveAttacks },
+                { "blockCooldown", BlockCooldown },
+                { "defensiveHealthThreshold", DefensiveHealthThreshold },
+                { "defensiveBlockCooldownMultiplier", DefensiveBlockCooldownMultiplier },
+                { "allowRandomAttackSelection", AllowRandomAttackSelection }
+            };
+        }
     }
 }

@@ -3,7 +3,7 @@
   "name": "Dark Knight",
   "type": "knight",
   "health": {
-    "maxHealth": 100,
+    "maxHealth": 40,
     "healthRegen": 0
   },
   "movement": {
@@ -27,6 +27,13 @@
       "repositioningEnabled": false,
       "meleeAggressiveness": 1.0,
       "backAwayChance": 0.0
+    },
+    "aiBehavior": {
+      "maxConsecutiveAttacks": 3,
+      "blockCooldown": 2.0,
+      "defensiveHealthThreshold": 0.35,
+      "defensiveBlockCooldownMultiplier": 0.75,
+      "allowRandomAttackSelection": true
     },
     "attackRanges": {
       "melee": {

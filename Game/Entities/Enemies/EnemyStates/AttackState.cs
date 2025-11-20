@@ -27,16 +27,16 @@ namespace DeckroidVania.Game.Entities.Enemies.States
         public void Enter()
         {
             // NEW: Use CombatComponent to select attack based on distance to target
-            if (_enemy?.CombatComponent != null && _enemy?.AIComponent != null)
+            if (_enemy?.CombatComponent != null && _enemy?.StateManagerComponent != null)
             {
-                float distanceToTarget = _enemy.AIComponent.GetDistanceToTarget();
+                float distanceToTarget = _enemy.StateManagerComponent.GetDistanceToTarget();
                 _currentAttack = _enemy.CombatComponent.SelectAttack(distanceToTarget);
                 
                 if (_currentAttack == null)
                 {
                     // No attack available at this distance - should chase instead
                     GD.Print($"[AttackState] No attack available at distance {distanceToTarget} - falling back to Chase");
-                    _enemy.AIComponent.ChangeState(EnemyState.Chase);
+                    _enemy.StateManagerComponent.ChangeState(EnemyState.Chase);
                     return;
                 }
             }
@@ -78,15 +78,15 @@ namespace DeckroidVania.Game.Entities.Enemies.States
             // Track how long we've been in attack state
             _stateEnteredTime += (float)delta;
 
-            // NEW: Use AIComponent to check for target
-            if (_enemy?.AIComponent == null || !_enemy.AIComponent.HasTarget())
+            // NEW: Use StateManagerComponent to check for target
+            if (_enemy?.StateManagerComponent == null || !_enemy.StateManagerComponent.HasTarget())
             {
                 ReturnToDefaultState();
                 return;
             }
 
-            Node3D target = _enemy.AIComponent.CurrentTarget;
-            float distanceToTarget = _enemy.AIComponent.GetDistanceToTarget();
+            Node3D target = _enemy.StateManagerComponent.CurrentTarget;
+            float distanceToTarget = _enemy.StateManagerComponent.GetDistanceToTarget();
 
             // Check if target is STILL in range for our current attack
             // Add a small buffer (1.5x range) to prevent immediate chase-attack loop
@@ -97,10 +97,10 @@ namespace DeckroidVania.Game.Entities.Enemies.States
             {
                 // Always return to Chase to re-evaluate attacks at new distance
                 // Once in Chase state, it will re-enter Attack when in range again
-                if (_enemy?.AIComponent != null)
+                if (_enemy?.StateManagerComponent    != null)
                 {
                     GD.Print($"[AttackState] Out of range ({distanceToTarget:F1}m > {effectiveRange:F1}m) and minimum duration passed - returning to Chase");
-                    _enemy.AIComponent.ChangeState(EnemyState.Chase);
+                    _enemy.StateManagerComponent.ChangeState(EnemyState.Chase);
                 }
                 
                 return;
@@ -138,9 +138,9 @@ namespace DeckroidVania.Game.Entities.Enemies.States
         {
             // Re-evaluate which attack to use based on current distance
             // This allows dynamic switching between melee/ranged attacks
-            if (_enemy?.AIComponent != null && _enemy?.CombatComponent != null)
+            if (_enemy?.StateManagerComponent != null && _enemy?.CombatComponent != null)
             {
-                float currentDistance = _enemy.AIComponent.GetDistanceToTarget();
+                float currentDistance = _enemy.StateManagerComponent.GetDistanceToTarget();
                 EnemyAttackData newAttack = _enemy.CombatComponent.SelectAttack(currentDistance);
                 
                 if (newAttack != null)
@@ -166,7 +166,7 @@ namespace DeckroidVania.Game.Entities.Enemies.States
                 // Parse the state transition string to EnemyState enum
                 if (System.Enum.TryParse(_currentAttack.StateTransition, out EnemyState targetState))
                 {
-                    _enemy.AIComponent.ChangeState(targetState);
+                    _enemy.StateManagerComponent.ChangeState(targetState);
                     return; // Don't execute normal attack - state transition handles it
                 }
                 else
@@ -208,10 +208,10 @@ namespace DeckroidVania.Game.Entities.Enemies.States
             {
                 defaultState = EnemyState.Patrol; // Knights patrol by default
             }
-            
-            if (_enemy?.AIComponent != null)
+
+            if (_enemy?.StateManagerComponent != null)
             {
-                _enemy.AIComponent.ChangeState(defaultState);
+                _enemy.StateManagerComponent.ChangeState(defaultState);
             }
         }
     }

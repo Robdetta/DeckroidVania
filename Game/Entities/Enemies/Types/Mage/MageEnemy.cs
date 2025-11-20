@@ -46,10 +46,10 @@ namespace DeckroidVania.Game.Entities.Enemies.Types
                 return;
             }
             
-            // Create AI state machine
-            if (AIComponent != null)
+            // Create state machine
+            if (StateManagerComponent != null)
             {
-                AIComponent.CreateStates(
+                StateManagerComponent.CreateStates(
                     _enemyData.Movement.PatrolSpeed,
                     _enemyData.Movement.PatrolRange,
                     _enemyData.Combat.ChaseSpeed

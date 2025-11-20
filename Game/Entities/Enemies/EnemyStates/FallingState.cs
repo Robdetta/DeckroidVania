@@ -51,9 +51,9 @@ namespace DeckroidVania.Game.Entities.Enemies.States
             // If we land on floor => return to default state
             if (_enemy.IsOnFloor())
             {
-                if (_enemy?.AIComponent != null)
+                if (_enemy?.StateManagerComponent != null)
                 {
-                    _enemy.AIComponent.ChangeState(EnemyState.Patrol);
+                    _enemy.StateManagerComponent.ChangeState(EnemyState.Patrol);
                 }
             }
         }

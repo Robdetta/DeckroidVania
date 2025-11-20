@@ -8,7 +8,12 @@
       "range": 4,
       "cooldown": 1.5,
       "animationName": "Melee",
-      "weight": 100
+      "weight": 100,
+      "hitbox": {
+        "size": [2, 2.5, 2],
+        "offset": [0, 0, 1.5],
+        "lifetime": 0.2
+      }
     },
     {
       "id": "002_block",
@@ -19,7 +24,12 @@
       "cooldown": 2.0,
       "animationName": "Shield",
       "stateTransition": "Block",
-      "weight": 30
+      "weight": 30,
+      "hitbox": {
+        "size": [2.5, 2.5, 1.5],
+        "offset": [0, 0, 2.0],
+        "lifetime": 0.3
+      }
     },
     {
       "id": "003_fireball",
@@ -30,7 +40,12 @@
       "cooldown": 1.0,
       "animationName": "Casting",
       "projectileScene": "uid://0ihjx6owfl1h",
-      "weight": 100
+      "weight": 100,
+      "hitbox": {
+        "size": [1.5, 1.5, 1.5],
+        "offset": [0, 0.5, 2.5],
+        "lifetime": 0.1
+      }
     },
     {
       "id": "004_staff_strike",
@@ -40,7 +55,12 @@
       "range": 3,
       "cooldown": 0.8,
       "animationName": "Melee",
-      "weight": 40
+      "weight": 40,
+      "hitbox": {
+        "size": [1.5, 1.5, 2.0],
+        "offset": [0, 0, 2.5],
+        "lifetime": 0.15
+      }
     }
   ]
 }

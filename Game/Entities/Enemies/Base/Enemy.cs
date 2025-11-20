@@ -4,6 +4,8 @@ using DeckroidVania.Game.Entities.Enemies.Controllers;
 using DeckroidVania.Game.Entities.Enemies.States;
 using DeckroidVania.Game.Entities.Enemies.Components;
 using DeckroidVania.Game.Entities.Enemies.Components.Interfaces;
+using DeckroidVania.Game.Entities.Enemies.Data;
+using DeckroidVania.Game.Combat.Hitbox;
 
 namespace DeckroidVania.Game.Entities.Enemies.Base
 
@@ -33,7 +35,7 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
         public Components.Interfaces.IHealthComponent HealthComponent { get; protected set; }
         public IMovementComponent MovementComponent { get; protected set; }
         public ICombatComponent CombatComponent { get; protected set; }
-        public IAIComponent AIComponent { get; protected set; }
+        public IStateManager StateManagerComponent   { get; protected set; }
         public IAnimationComponent AnimationComponent { get; protected set; }
         public IVisionComponent VisionComponent { get; protected set; }
 
@@ -44,8 +46,102 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
             InitializeHealth();
             InitializeMovementController();
             // Components will be initialized by derived classes after loading JSON data
+            // After loading EnemyData from JSON:
+            if (EnemyData?.Combat != null)
+            {
+                GD.Print($"[Enemy] Initializing CombatComponent with EnemyData.Combat");
+                GD.Print($"[Enemy] AttackRanges is null: {EnemyData.Combat.AttackRanges == null}");
+                
+                if (CombatComponent is CombatComponent combatComp)
+                {
+                    combatComp.Initialize(this, EnemyData.Combat);
+                }
+            }
+            else
+            {
+                GD.PushError("[Enemy] EnemyData.Combat is NULL!");
+            }
+    
         }
         
+        /// Spawn hitbox from consolidated EnemyAttackData (new approach)
+        public void SpawnHitbox(EnemyAttackData attackData)
+        {
+            if (attackData?.Hitbox == null)
+            {
+                return;
+            }
+
+            // Build HitboxData from attack data
+            var hitboxData = new HitboxData
+            {
+                Size = attackData.Hitbox.SizeVec,
+                Offset = attackData.Hitbox.OffsetVec,
+                Lifetime = attackData.Hitbox.Lifetime,
+                Damage = attackData.Damage
+            };
+
+            // Find the Visual/Knight node
+            Node3D visualNode = GetNodeOrNull<Node3D>("Visual/Knight");
+            if (visualNode == null)
+            {
+                visualNode = GetNodeOrNull<Node3D>("Visual");
+            }
+
+            if (visualNode == null)
+            {
+                return;
+            }
+
+            var hitboxComponent = new HitboxComponent();
+            visualNode.AddChild(hitboxComponent);
+            hitboxComponent.Initialize(hitboxData, "Player");
+        }
+        
+        /// <summary>
+        /// Spawn hitbox from config ID (legacy approach - kept for backwards compatibility)
+        /// </summary>
+        public void SpawnHitbox(string configId)
+        {
+            var hitboxData = HitboxConfigLoader.LoadHitboxConfig(configId);
+            
+            // Find the Visual/Knight node (or just Visual if Knight doesn't exist)
+            Node3D visualNode = GetNodeOrNull<Node3D>("Visual/Knight");
+            if (visualNode == null)
+            {
+                visualNode = GetNodeOrNull<Node3D>("Visual");
+            }
+            
+            if (visualNode == null)
+            {
+                return;
+            }
+            
+            var hitboxComponent = new HitboxComponent();
+            visualNode.AddChild(hitboxComponent);  // Add to Visual/Knight instead of Enemy root
+            hitboxComponent.Initialize(hitboxData, "Player");
+        }
+        
+        public void EnableMeleeHitbox()
+        {
+            SpawnHitbox("sword_slash");
+        }
+
+        public void DisableMeleeHitbox()
+        {
+            // Hitbox auto-destroys
+        }
+
+        public void EnableBlockHitbox()
+        {
+            SpawnHitbox("block_counter");
+        }
+
+        public void DisableBlockHitbox()
+        {
+            // Hitbox auto-destroys
+        }
+
         /// <summary>
         /// Initialize all ECS components - call this after loading enemy data from JSON
         /// </summary>
@@ -81,9 +177,10 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
             // 3. Create CombatComponent
             var combatComp = new Components.CombatComponent();
             AddChild(combatComp);
-            if (enemyData.Combat.AttackRanges != null)
+            // Initialize Combat Component with full CombatData
+            if (CombatComponent != null)
             {
-                combatComp.Initialize(enemyData.Combat.AttackRanges, enemyData.Combat.AttackCooldown);
+                ((CombatComponent)CombatComponent).Initialize(this, enemyData.Combat);
             }
             else
             {
@@ -91,9 +188,9 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
             }
             CombatComponent = combatComp;
             
-            // 4. Create AIComponent
-            var aiComp = new Components.AIComponent();
-            AddChild(aiComp);
+            // 4. Create StateManager
+            var stateManager = new Components.StateManager();
+            AddChild(stateManager);
             
             // Parse initial state from JSON (case-insensitive)
             EnemyState initialState = EnemyState.Idle; // Default
@@ -109,12 +206,12 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
                     initialState = EnemyState.Idle;
                 }
             }
-            
-            aiComp.Initialize(initialState, enemyData.Combat.DetectionBehavior);
-            AIComponent = aiComp;
-            
-            GD.Print($"[Enemy] AIComponent initialized - Initial State: {initialState}");
-            
+
+            stateManager.Initialize(initialState, enemyData.Combat.DetectionBehavior);
+            StateManagerComponent = stateManager;
+
+            GD.Print($"[Enemy] StateManagerComponent initialized - Initial State: {initialState}");
+
             // 5. Create AnimationComponent
             var animComp = new Components.AnimationComponent();
             AddChild(animComp);
@@ -155,17 +252,17 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
         /// <param name="target">The target that was detected (the player)</param>
         private void OnTargetDetectedByVision(Node3D target)
         {
-            if (AIComponent == null)
+            if (StateManagerComponent == null)
                 return;
-            
-            GD.Print($"[Enemy] 👁️ Target detected by vision! Current state: {AIComponent.CurrentState}");
-            
-            // Tell AIComponent about the target
-            AIComponent.SetTarget(target);
-            
+
+            GD.Print($"[Enemy] 👁️ Target detected by vision! Current state: {StateManagerComponent.CurrentState}");
+
+            // Tell StateManagerComponent about the target
+            StateManagerComponent.SetTarget(target);
+
             // Only change state if we're passively patrolling/idling
             // (Don't interrupt attack/knockback/etc)
-            if (AIComponent.CurrentState == EnemyState.Idle || AIComponent.CurrentState == EnemyState.Patrol)
+            if (StateManagerComponent.CurrentState == EnemyState.Idle || StateManagerComponent.CurrentState == EnemyState.Patrol)
             {
                 // Read detection behavior from JSON
                 string detectionBehavior = GetDetectionBehavior();
@@ -174,13 +271,13 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
                 {
                     // Mage behavior: Go straight to attacking (ranged)
                     GD.Print("[Enemy] 🎯 Detection behavior: ATTACK - engaging immediately!");
-                    AIComponent.ChangeState(EnemyState.Attack);
+                    StateManagerComponent.ChangeState(EnemyState.Attack);
                 }
                 else // "chase" or default
                 {
                     // Knight behavior: Chase first, attack when close
                     GD.Print("[Enemy] 🏃 Detection behavior: CHASE - pursuing target!");
-                    AIComponent.ChangeState(EnemyState.Chase);
+                    StateManagerComponent.ChangeState(EnemyState.Chase);
                 }
             }
         }
@@ -191,28 +288,28 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
         /// <param name="target">The target that was lost</param>
         private void OnTargetLostFromVision(Node3D target)
         {
-            if (AIComponent == null)
+            if (StateManagerComponent == null)
                 return;
             
             GD.Print($"[Enemy] 🚫 Target lost from vision");
-            
-            // Clear the target from AIComponent
-            AIComponent.ClearTarget();
-            
+
+            // Clear the target from StateManagerComponent
+            StateManagerComponent.ClearTarget();
+
             // Only return to passive state if we were actively chasing
-            if (AIComponent.CurrentState == EnemyState.Chase)
+            if (StateManagerComponent.CurrentState == EnemyState.Chase)
             {
                 // Return to default idle behavior
                 // Mage idles in place, Knight patrols
                 if (this is Types.MageEnemy)
                 {
                     GD.Print("[Enemy] Returning to Idle (Mage)");
-                    AIComponent.ChangeState(EnemyState.Idle);
+                    StateManagerComponent.ChangeState(EnemyState.Idle);
                 }
                 else
                 {
                     GD.Print("[Enemy] Returning to Patrol (Knight)");
-                    AIComponent.ChangeState(EnemyState.Patrol);
+                    StateManagerComponent.ChangeState(EnemyState.Patrol);
                 }
             }
         }
@@ -228,12 +325,11 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
         public override void _PhysicsProcess(double delta)
         {
             base._PhysicsProcess(delta);
-            
-            // Update AI state machine
-            AIComponent?.Update(delta);
-            
+            // Update StateManagerComponent
+            StateManagerComponent?.Update(delta);
+
             // NEW: Apply gravity through MovementComponent if not in Knockback
-            if (AIComponent?.CurrentState != EnemyState.Knockback && !IsOnFloor())
+            if (StateManagerComponent?.CurrentState != EnemyState.Knockback && !IsOnFloor())
             {
                 if (MovementComponent != null)
                 {
@@ -304,22 +400,22 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
         public virtual void TakeDamage(int amount, float knockbackForce, float knockbackDuration, Vector3 attackerPosition)
         {
             // Check if current state allows taking damage or knockback (blocking prevents BOTH)
-            if (AIComponent != null)
+            if (StateManagerComponent != null)
             {
-                var currentState = AIComponent.GetState(AIComponent.CurrentState);
+                var currentState = StateManagerComponent.GetState(StateManagerComponent.CurrentState);
                 if (currentState != null)
                 {
                     // If damage is blocked, ALSO block knockback
                     if (!currentState.CanTakeDamage)
                     {
-                        GD.Print($"[{Name}] 🛡️ BLOCKED! State ({AIComponent.CurrentState}) prevents damage!");
+                        GD.Print($"[{Name}] 🛡️ BLOCKED! State ({StateManagerComponent.CurrentState}) prevents damage!");
                         return; // Damage AND knockback completely blocked!
                     }
                     
                     // If knockback is blocked (but damage allowed), still skip knockback
                     if (!currentState.CanBeKnockedBack)
                     {
-                        GD.Print($"[{Name}] 🛡️ Knockback blocked! State ({AIComponent.CurrentState}) is immune to knockback!");
+                        GD.Print($"[{Name}] 🛡️ Knockback blocked! State ({StateManagerComponent.CurrentState}) is immune to knockback!");
                         HealthComponent?.TakeDamage(amount); // Still take damage though
                         return;
                     }
@@ -363,22 +459,22 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
 
         public void ApplyKnockback(Vector3 knockbackVelocity, float knockbackDuration)
         {
-            if (AIComponent == null)
+            if (StateManagerComponent == null)
             {
-                GD.PrintErr("[Enemy] AIComponent is null, cannot apply knockback");
+                GD.PrintErr("[Enemy] StateManagerComponent is null, cannot apply knockback");
                 return;
             }
             
             // Check if current state allows knockback
-            var currentState = AIComponent.GetState(AIComponent.CurrentState);
+            var currentState = StateManagerComponent.GetState(StateManagerComponent.CurrentState);
             if (currentState != null && !currentState.CanBeKnockedBack)
             {
-                GD.Print($"[{Name}] 🛡️ Current state ({AIComponent.CurrentState}) is immune to knockback!");
+                GD.Print($"[{Name}] 🛡️ Current state ({StateManagerComponent.CurrentState}) is immune to knockback!");
                 return; // State prevents knockback (blocking, already knocked back, etc.)
             }
-            
-            // Get the KnockBackState instance from AIComponent's state dictionary
-            var knockBackStateBase = AIComponent.GetState(EnemyState.Knockback);
+
+            // Get the KnockBackState instance from StateManagerComponent's state dictionary
+            var knockBackStateBase = StateManagerComponent.GetState(EnemyState.Knockback);
             if (knockBackStateBase is KnockBackState knockBackState)
             {
                 GD.Print($"[{Name}] 💥 Applying knockback!");
@@ -387,7 +483,7 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
                 knockBackState.ApplyKnockback(knockbackVelocity, knockbackDuration);
 
                 // Change the enemy's state to KnockBack
-                AIComponent.ChangeState(EnemyState.Knockback);
+                StateManagerComponent.ChangeState(EnemyState.Knockback);
             }
             else
             {
@@ -443,11 +539,11 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
         protected virtual float GetKnockbackResistance()
         {
             // Check if currently blocking - complete immunity!
-            if (AIComponent != null && AIComponent.CurrentState == EnemyState.Block)
+            if (StateManagerComponent != null && StateManagerComponent.CurrentState == EnemyState.Block)
             {
                 return 0f; // 🛡️ COMPLETE IMMUNITY while blocking!
             }
-            
+
             return 1f; // Default: no resistance
         }
     }
