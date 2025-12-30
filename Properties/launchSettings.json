@@ -1,9 +1,6 @@
 {
   "profiles": {
-    "DeckroidVania2": {
-      "commandName": "Project"
-    },
-    "Profile 1": {
+    "StartGame": {
       "commandName": "Executable",
       "executablePath": "F:\\GodotEngine\\Godot_v4.3-stable_mono_win64.exe",
       "commandLineArgs": "--path . --verbose",
