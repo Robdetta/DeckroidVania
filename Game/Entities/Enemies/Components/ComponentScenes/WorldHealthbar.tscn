@@ -1,0 +1,24 @@
+[gd_scene load_steps=5 format=3 uid="uid://c2r4i18vexhku"]
+
+[ext_resource type="Script" uid="uid://ci2aclfhh0bk" path="res://Game/Components/Health/WorldUIHealthbar.cs" id="1_ceynt"]
+[ext_resource type="Shader" uid="uid://bocwmdh6j27ne" path="res://Game/Entities/Enemies/Shaders/Healthbar.gdshader" id="2_mcmg1"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_4mu4y"]
+size = Vector2(1.75, 0.25)
+orientation = 2
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cbqpa"]
+resource_local_to_scene = true
+render_priority = 0
+shader = ExtResource("2_mcmg1")
+shader_parameter/health_ratio = 1.0
+shader_parameter/bar_color = Color(1.44392e-07, 0.701049, 1.54018e-06, 1)
+shader_parameter/background_color = Color(0.473976, 0.473976, 0.473976, 1)
+
+[node name="Healthbar" type="Sprite3D"]
+billboard = 1
+script = ExtResource("1_ceynt")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlaneMesh_4mu4y")
+surface_material_override/0 = SubResource("ShaderMaterial_cbqpa")
