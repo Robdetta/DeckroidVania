@@ -4,12 +4,12 @@ using System.Collections.Generic;
 public partial class EnemySpawner : Node
 {
     private MarkerManager _markerManager;
-    private Dictionary<string, IEnemyFactory> _enemyFactories = new();
+    private Dictionary<EnemyTypesEnum, IEnemyFactory> _enemyFactories = new();
 
     public override void _Ready()
     {
         GD.Print("EnemySpawner: Initializing...");
-        
+
         // Get MarkerManager (should be a sibling node)
         _markerManager = GetParent().GetNode<MarkerManager>("MarkerManager");
         if (_markerManager == null)
@@ -17,24 +17,24 @@ public partial class EnemySpawner : Node
             GD.PrintErr("EnemySpawner: Failed to find MarkerManager!");
             return;
         }
-        
+
         // Register factories
         RegisterFactories();
-        
+
         GD.Print("EnemySpawner: Initialization complete");
     }
 
     private void RegisterFactories()
     {
         GD.Print("EnemySpawner: Registering factories...");
-        _enemyFactories["mage"] = new MageEnemyFactory();
-        _enemyFactories["knight"] = new KnightEnemyFactory();
+        _enemyFactories[EnemyTypesEnum.MAGE] = new MageEnemyFactory();
+        _enemyFactories[EnemyTypesEnum.KNIGHT] = new KnightEnemyFactory();
         GD.Print($"EnemySpawner: Registered factories: {string.Join(", ", _enemyFactories.Keys)}");
     }
 
-    public void SpawnEnemyAtMarker(string enemyType, string markerName)
+    public void SpawnEnemyAtMarker(EnemyTypesEnum enemyType, string markerName)
     {
-        GD.Print($"EnemySpawner: Attempting to spawn {enemyType} at {markerName}");
+        GD.Print($"EnemySpawner: Attempting to spawn EnemyType: {enemyType} at {markerName}");
 
         if (_markerManager == null)
         {
@@ -57,9 +57,9 @@ public partial class EnemySpawner : Node
 
         var enemy = factory.CreateEnemy(marker.GlobalTransform);
         AddChild(enemy);
-        GD.Print($"EnemySpawner: Successfully spawned {enemyType} at {markerName}");
+        GD.Print($"EnemySpawner: Successfully spawned EnemyType: {enemyType} at {markerName}");
     }
-    
+
     public void ClearAllEnemies()
     {
         GD.Print("EnemySpawner: Clearing all enemies...");
