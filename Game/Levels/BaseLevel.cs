@@ -70,10 +70,10 @@ public abstract partial class BaseLevel : Node3D
 // Data structure for enemy spawn information
 public struct EnemySpawnInfo
 {
-    public string EnemyType { get; set; }
+    public EnemyTypesEnum EnemyType { get; set; }
     public string MarkerName { get; set; }
 
-    public EnemySpawnInfo(string enemyType, string markerName)
+    public EnemySpawnInfo(EnemyTypesEnum enemyType, string markerName)
     {
         EnemyType = enemyType;
         MarkerName = markerName;

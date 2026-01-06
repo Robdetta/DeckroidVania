@@ -78,7 +78,7 @@ public partial class World2d : Node3D
     }
 
 
-    public void SpawnEnemyAtMarker(string enemyType, string markerName)
+    public void SpawnEnemyAtMarker(EnemyTypesEnum enemyType, string markerName)
     {
         GD.Print($"World2D: Requesting spawn of {enemyType} at {markerName}");
         EnemySpawner?.SpawnEnemyAtMarker(enemyType, markerName);
