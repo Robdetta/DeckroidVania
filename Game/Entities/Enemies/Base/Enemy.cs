@@ -1,8 +1,3 @@
-using Godot;
-using DeckroidVania.Game.Components.Health;
-using DeckroidVania.Game.Entities.Enemies.Controllers;
-using DeckroidVania.Game.Entities.Enemies.States;
-using DeckroidVania.Game.Entities.Enemies.Components;
 using DeckroidVania.Game.Entities.Enemies.Components.Interfaces;
 using DeckroidVania.Game.Entities.Enemies.Data;
 using DeckroidVania.Game.Combat.Hitbox;
@@ -159,7 +154,7 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
             GD.Print("[Enemy] ═══════════════════════════════════════");
             GD.Print($"[Enemy] Initializing ECS Components for {enemyData.Name}");
             GD.Print("[Enemy] ═══════════════════════════════════════");
-            
+
             // 1. Create HealthComponent
             var healthComp = new Components.HealthComponent();
             AddChild(healthComp);
@@ -167,13 +162,17 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
             healthComp.OnHealthChanged += OnHealthChanged;
             healthComp.OnDeath += OnDeath;
             HealthComponent = healthComp;
-            
+
+            var healthbar = GetNode<WorldUIHealthbar>("Healthbar");
+            if (healthbar != null)
+                healthbar.Initialize(healthComp);
+
             // 2. Create MovementComponent
             var movementComp = new Components.MovementComponent();
             AddChild(movementComp);
             movementComp.Initialize(this, enemyData.Movement.PatrolSpeed, enemyData.Movement.PatrolRange);
             MovementComponent = movementComp;
-            
+
             // 3. Create CombatComponent
             var combatComp = new Components.CombatComponent();
             AddChild(combatComp);
@@ -217,11 +216,11 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
             AddChild(animComp);
             animComp.Initialize(); // Will try to auto-find AnimationTree
             AnimationComponent = animComp;
-            
+
             // 6. Create VisionComponent
             var visionComp = new Components.VisionComponent();
             AddChild(visionComp);
-            
+
             // Find the VisionArea node (should be a child of the enemy in the scene)
             var visionArea = GetNodeOrNull<Area3D>("VisionArea");
             if (visionArea != null)
@@ -239,12 +238,12 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
             {
                 GD.PushWarning("[Enemy] VisionArea not found - enemy won't detect player!");
             }
-            
+
             VisionComponent = visionComp;
-            
+
             GD.Print("[Enemy] ✅ All components initialized!");
         }
-        
+
         /// <summary>
         /// Event handler: Called when VisionComponent detects a target
         /// This is the "callback" - VisionComponent announces "I found something!" and we respond
@@ -266,7 +265,7 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
             {
                 // Read detection behavior from JSON
                 string detectionBehavior = GetDetectionBehavior();
-                
+
                 if (detectionBehavior.ToLower() == "attack")
                 {
                     // Mage behavior: Go straight to attacking (ranged)
@@ -281,7 +280,7 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
                 }
             }
         }
-        
+
         /// <summary>
         /// Event handler: Called when VisionComponent loses sight of target
         /// </summary>
@@ -290,7 +289,7 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
         {
             if (StateManagerComponent == null)
                 return;
-            
+
             GD.Print($"[Enemy] 🚫 Target lost from vision");
 
             // Clear the target from StateManagerComponent
@@ -313,7 +312,7 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
                 }
             }
         }
-        
+
         /// <summary>
         /// Get detection behavior - override in derived classes if needed
         /// </summary>
@@ -337,13 +336,13 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
                     MovementComponent.Velocity = new Vector3(currentVel.X, currentVel.Y - Gravity * (float)delta, currentVel.Z);
                 }
             }
-            
+
             // NEW: Apply movement through MovementComponent
             if (MovementComponent != null)
             {
                 MovementComponent.ApplyMovement(delta);
             }
-            
+
             // Update combat component cooldown
             if (CombatComponent != null)
             {
@@ -356,7 +355,7 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
                 GlobalPosition = new Vector3(GlobalPosition.X, GlobalPosition.Y, 0f);
             }
 
-            
+
             // Prevent wall sliding
             for (int i = 0; i < GetSlideCollisionCount(); i++)
             {
@@ -366,14 +365,14 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
                     Velocity = new Vector3(0, Velocity.Y, 0);
                     break;
                 }
-            }    
+            }
 
             // Check for collision with player - ONLY physical collisions, NOT vision area
             for (int i = 0; i < GetSlideCollisionCount(); i++)
             {
                 KinematicCollision3D collision = GetSlideCollision(i);
                 Node3D collider = collision.GetCollider() as Node3D;
-                
+
                 // Make sure it's the player AND it's NOT the vision area
                 if (collider != null && collider.IsInGroup("Player"))
                 {
@@ -411,7 +410,7 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
                         GD.Print($"[{Name}] 🛡️ BLOCKED! State ({StateManagerComponent.CurrentState}) prevents damage!");
                         return; // Damage AND knockback completely blocked!
                     }
-                    
+
                     // If knockback is blocked (but damage allowed), still skip knockback
                     if (!currentState.CanBeKnockedBack)
                     {
@@ -421,20 +420,20 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
                     }
                 }
             }
-            
+
             GD.Print($"{Name} taking damage: {amount}");
             HealthComponent?.TakeDamage(amount);
 
             // **Apply knockback resistance multiplier**
             float resistance = GetKnockbackResistance();
-            
+
             // **If resistance is 0 or less, skip knockback entirely (immunity)**
             if (resistance <= 0f)
             {
                 GD.Print($"[{Name}] Knockback immunity! Resistance: {resistance}");
                 return;
             }
-            
+
             knockbackForce *= resistance;
             if (resistance < 1f)
             {
@@ -449,7 +448,7 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
             // Zero out the Y component to keep the knockback horizontal
             knockbackDirectionGlobal.Y = 0;
             knockbackDirectionGlobal = knockbackDirectionGlobal.Normalized();
-            
+
             GD.Print($"Final knockback direction: {knockbackDirectionGlobal}, Force: {knockbackForce}");
             GD.Print($"Final knockback velocity: {knockbackDirectionGlobal * knockbackForce}");
 
@@ -464,7 +463,7 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
                 GD.PrintErr("[Enemy] StateManagerComponent is null, cannot apply knockback");
                 return;
             }
-            
+
             // Check if current state allows knockback
             var currentState = StateManagerComponent.GetState(StateManagerComponent.CurrentState);
             if (currentState != null && !currentState.CanBeKnockedBack)
@@ -478,7 +477,7 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
             if (knockBackStateBase is KnockBackState knockBackState)
             {
                 GD.Print($"[{Name}] 💥 Applying knockback!");
-                
+
                 // Apply the knockback velocity and duration to the KnockBackState
                 knockBackState.ApplyKnockback(knockbackVelocity, knockbackDuration);
 
@@ -494,6 +493,7 @@ namespace DeckroidVania.Game.Entities.Enemies.Base
         protected virtual void OnHealthChanged(int newHealth)
         {
             GD.Print($"{Name} health changed to: {newHealth}");
+            // update healthbar here?
         }
 
         protected virtual void OnDeath()
