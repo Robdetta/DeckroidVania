@@ -1,6 +1,10 @@
 using DeckroidVania.Game.Entities.Enemies.Components.Interfaces;
+using DeckroidVania.Game.Entities.Enemies.States;
+using DeckroidVania.Game.Entities.Enemies.Components;
 using DeckroidVania.Game.Entities.Enemies.Data;
 using DeckroidVania.Game.Combat.Hitbox;
+using Godot;
+
 
 namespace DeckroidVania.Game.Entities.Enemies.Base
 
