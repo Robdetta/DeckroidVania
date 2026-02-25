@@ -17,7 +17,7 @@ public partial class Player : CharacterBody3D
     }
 
     [Export]
-    private PlayerAnimationTree playerAnimationTree;
+    public PlayerAnimationTree playerAnimationTree;
     [Export]
     private MovementController _movementController;
     [Export]
@@ -119,7 +119,12 @@ public partial class Player : CharacterBody3D
                     //TODO: Add animation state for 'Tumble' or some form of substitution
                     //playerAnimationTree.ChangeState(PlayerAnimationTree.AnimationState.Tumble);
                 }
-
+                break;
+            case PlayerState.WallStick:
+                if (playerAnimationTree.CurrentState != PlayerAnimationTree.AnimationState.WallSlide)
+                {              
+                    playerAnimationTree.ChangeState(PlayerAnimationTree.AnimationState.WallSlide);
+                }
                 break;
             default:
                 // Handle other movement states

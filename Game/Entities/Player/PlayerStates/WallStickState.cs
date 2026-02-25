@@ -1,6 +1,7 @@
 using Godot;
 using DeckroidVania2.Game.Player.Interfaces;
 using DeckroidVania2.Game.Scripts.Inputs;
+using DeckroidVania2.Game.Player.PlayerStates;
 
 namespace DeckroidVania2.Game.Player.PlayerStates;
 
@@ -19,6 +20,7 @@ public class WallStickState : IPlayerState
     {
         GD.Print("Wall State Entered");
         _controller._wallStickTimer = 0f;
+        
     }
 
     public void Exit()

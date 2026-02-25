@@ -13,7 +13,8 @@ public partial class PlayerAnimationTree : AnimationTree
 		Dash = 3,
 		Run = 4,
 		Attack = 5,
-		Projectile = 6
+		Projectile = 6,
+		WallSlide = 7
 	}
 
 	private AnimationState currentState = AnimationState.Normal;
@@ -59,6 +60,9 @@ public partial class PlayerAnimationTree : AnimationTree
 				break;
 			case AnimationState.Projectile:
 				playback.Travel("Projectile");
+				break;
+			case AnimationState.WallSlide:
+				playback.Travel("WallSlide");
 				break;
 		}
 	}
