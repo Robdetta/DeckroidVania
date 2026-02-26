@@ -1,8 +1,7 @@
 using Godot;
 using DeckroidVania2.Game.Player.Interfaces;
 using DeckroidVania2.Game.Scripts.Inputs;
-using DeckroidVania2.Game.Player.PlayerStates;
-
+using System;
 namespace DeckroidVania2.Game.Player.PlayerStates;
 
 public class WallStickState : IPlayerState
@@ -20,7 +19,40 @@ public class WallStickState : IPlayerState
     {
         GD.Print("Wall State Entered");
         _controller._wallStickTimer = 0f;
-        
+
+        // Determine wall direction
+        float wallDirection = _controller.GetWallPushDirection();
+
+        // Fallback: if GetWallPushDirection returns 0, use input direction
+        if (wallDirection == 0f)
+        {
+            float inputRight = Input.GetActionStrength(ControlsSchema.UI_RIGHT);
+            float inputLeft = Input.GetActionStrength(ControlsSchema.UI_LEFT);
+
+            if (inputRight > 0.1f)
+                wallDirection = -1f;  // Moving right = wall on right
+            else if (inputLeft > 0.1f)
+                wallDirection = 1f;   // Moving left = wall on left
+        }
+
+        // Set facing direction based on wall
+        if (wallDirection != 0f)
+        {
+            // Wall on left (push right, so face right)
+            if (wallDirection > 0f)
+                _controller._faceRight = true;
+            // Wall on right (push left, so face left)
+            else if (wallDirection < 0f)
+                _controller._faceRight = false;
+        }
+
+        // Immediately apply the rotation instead of waiting for next frame
+        Node3D rootNode = _controller._characterBody.GetNode<Node3D>("Visual/RootNode");
+        if (rootNode != null)
+        {
+            float targetRotY = _controller._faceRight ? 0 : -MathF.PI;
+            rootNode.Rotation = new Vector3(0, targetRotY, 0);
+        }
     }
 
     public void Exit()

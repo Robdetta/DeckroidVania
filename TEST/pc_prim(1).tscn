@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://uxjts4i25l6e"]
+
+[ext_resource type="PackedScene" uid="uid://1w2etp00mrel" path="res://Assets/Internal/pcPRIM(1).fbx" id="1_yn73c"]
+
+[node name="pcPRIM(1)" instance=ExtResource("1_yn73c")]
