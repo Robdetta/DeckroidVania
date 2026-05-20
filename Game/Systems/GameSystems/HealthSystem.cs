@@ -1,6 +1,8 @@
 using Godot;
 using System;
 
+namespace DeckroidVania2.Game.Systems.GameSystems;
+
 public partial class HealthSystem : Node
 {	
 	// 1) Static Instance property
@@ -9,14 +11,14 @@ public partial class HealthSystem : Node
 	[Signal] public delegate void HealthChangedEventHandler(int current, int max);
     [Signal] public delegate void DiedEventHandler();
 
-	[Export] public int MaxHealth { get; set; } = 100;
+    [Export] public int MaxHealth { get; set; } = 100;
     private int _current;
     public int Current {
         get => _current;
         set {
             _current = Mathf.Clamp(value, 0, MaxHealth);
-            EmitSignal(nameof(HealthChanged), _current, MaxHealth);
-            if (_current == 0) EmitSignal(nameof(Died));
+            EmitSignal(SignalName.HealthChanged, _current, MaxHealth);
+            if (_current == 0) EmitSignal(SignalName.Died);
         }
     }
 

@@ -1,3 +1,5 @@
+//This is enemy Health Component
+
 using Godot;
 using DeckroidVania.Game.Entities.Components;
 
