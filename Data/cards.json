@@ -37,7 +37,7 @@
       {
         "type": "Projectile",
         "params": {
-          "scenePath": "res://Game/Entities/Player/Attacks/Projectiles/Fireball.tscn",
+          "scenePath": "res://Game/Entities/Player/Attacks/Projectiles/Projectile.tscn",
           "damage": 25,
           "speed": 18.0,
           "lifetime": 10.0,

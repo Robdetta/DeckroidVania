@@ -5,7 +5,7 @@
 [sub_resource type="SphereShape3D" id="SphereShape3D_o6h6a"]
 
 [sub_resource type="ORMMaterial3D" id="ORMMaterial3D_r4iyh"]
-albedo_color = Color(0.468354, 0.0958711, 0.0879393, 1)
+albedo_color = Color(0.352184, 0.131943, 0.0185885, 1)
 
 [sub_resource type="SphereMesh" id="SphereMesh_o6h6a"]
 

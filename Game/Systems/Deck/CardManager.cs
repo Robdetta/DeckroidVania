@@ -46,7 +46,7 @@ public partial class CardManager : Node
         var deckData = DeckBuilder.LoadDeck("deck1.json", forceRegenerateDeck); // currently 5x of each card, 25 total with 5 cards made
         if (deckData == null)
         {
-            deckData = DeckBuilder.CreateDefaultDeck(allCards, 10); // Creates a default deck with 10 copies of each card (total 60 cards with current JSON)
+            deckData = DeckBuilder.CreateDefaultDeck(allCards, 5); // Creates a default deck with 10 copies of each card (total 60 cards with current JSON)
             DeckBuilder.SaveDeck(deckData, "deck1.json");
         }
         var initialDeck = deckData.CardIds
