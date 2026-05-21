@@ -20,11 +20,11 @@
     "cardName": "Holy Light",
     "type": "Core Card - Healing Power",
     "manaCost": 2,
-    "activateEffectDesc": "Heals 30 HP to the player.",
+    "activateEffectDesc": "Heals 10 HP to the player.",
     "activateEffects": [
       {
         "type": "Heal",
-        "params": { "amount": 30 }
+        "params": { "amount": 10 }
       }
     ]
   },
@@ -43,5 +43,18 @@
     "manaCost": 6,
     "activateEffect": "Deals 40 damage to all enemies and applies Burn status for 5 seconds.",
     "sacrificeEffect": "Summons a Fire Elemental to fight alongside the player."
+  },
+  {
+    "id": 6,
+    "cardName": "Holy Light 2",
+    "type": "Core Card - Healing Power",
+    "manaCost": 2,
+    "activateEffectDesc": "Heals 30 HP to the player.",
+    "activateEffects": [
+      {
+        "type": "Heal",
+        "params": { "amount": 20 }
+      }
+    ]
   }
 ]

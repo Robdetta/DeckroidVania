@@ -38,10 +38,15 @@ public partial class CardManager : Node
         _handManager = new HandManager(slotArea);
 
         var allCards = await CardLoader.LoadCardsFromJson("Data/cards.json");
-        var deckData = DeckBuilder.LoadDeck("deck1.json"); // currently 5x of each card, 25 total with 5 cards made
+
+        // Change this to 'true' to clear your computer's persistent cache and build a fresh deck!
+        // Once you verify the deck size is correct in the console, you can change this back to 'false'
+        bool forceRegenerateDeck = true;
+
+        var deckData = DeckBuilder.LoadDeck("deck1.json", forceRegenerateDeck); // currently 5x of each card, 25 total with 5 cards made
         if (deckData == null)
         {
-            deckData = DeckBuilder.CreateDefaultDeck(allCards, 5);
+            deckData = DeckBuilder.CreateDefaultDeck(allCards, 10); // Creates a default deck with 10 copies of each card (total 60 cards with current JSON)
             DeckBuilder.SaveDeck(deckData, "deck1.json");
         }
         var initialDeck = deckData.CardIds
