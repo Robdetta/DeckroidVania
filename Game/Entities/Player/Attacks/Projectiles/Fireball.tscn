@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3 uid="uid://nvpc8qako17m"]
+
+[ext_resource type="Script" uid="uid://btynd5x0fmyn" path="res://Game/Entities/Player/Attacks/Projectiles/Projectile.cs" id="1_kn50h"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_bkn4n"]
+
+[sub_resource type="ORMMaterial3D" id="ORMMaterial3D_i3vap"]
+albedo_color = Color(0, 0, 1, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_74gjg"]
+
+[node name="Fireball" type="Area3D"]
+script = ExtResource("1_kn50h")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_bkn4n")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = SubResource("ORMMaterial3D_i3vap")
+mesh = SubResource("SphereMesh_74gjg")

@@ -247,4 +247,30 @@ public partial class Player : CharacterBody3D
             _attackManager.SetAttackById(weapon.AttackIds[0]);
         }
     }
+
+    public void ExecuteCardAttack(string attackName)
+    {
+        if (_attackManager != null)
+        {
+            GD.Print($"Player: Triggering card attack by name: {attackName}");
+            _attackManager.SetAttackByName(attackName);
+            _attackManager.PerformAttack();
+            
+            // If it's a projectile attack, your AttackManager will know what to do!
+            // If it's a melee sweep, you can also trigger the animation/hitbox here:
+            _attackManager.ActivateHitbox(); 
+        }
+    }
+
+    public void ExecuteCardAttack(int attackId)
+    {
+        if (_attackManager != null)
+        {
+            GD.Print($"Player: Triggering card attack by ID: {attackId}");
+            _attackManager.SetAttackById(attackId);
+            _attackManager.PerformAttack();
+            _attackManager.ActivateHitbox();
+        }
+    }
+
 }

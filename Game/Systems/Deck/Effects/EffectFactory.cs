@@ -21,6 +21,8 @@ public static class EffectFactory
                 return new ProjectileEffect();
             case "ApplyBuff":
                 return new ApplyBuffEffect();
+            case "AttackManager":
+                return new AttackManagerEffect();                      
             default:
                 GD.PrintErr($"EffectFactory: Unknown effect type '{effectType}'");
                 return null;

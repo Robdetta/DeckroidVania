@@ -33,7 +33,20 @@
     "cardName": "Shadow Bolt",
     "type": "Core Card - Dark Magic",
     "manaCost": 5,
-    "activateEffect": "Deals 80 damage to a single enemy.",
+    "activateEffects": [
+      {
+        "type": "Projectile",
+        "params": {
+          "scenePath": "res://Game/Entities/Player/Attacks/Projectiles/Fireball.tscn",
+          "damage": 25,
+          "speed": 18.0,
+          "lifetime": 10.0,
+          "knockbackForce": 10.0,
+          "knockbackDuration": 0.2,
+          "color": "#FF4500"
+        }
+      }
+    ],
     "sacrificeEffect": "Reduces the enemy's defense by 50% for 10 seconds."
   },
   {
