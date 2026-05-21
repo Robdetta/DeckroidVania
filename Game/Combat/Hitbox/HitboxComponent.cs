@@ -2,6 +2,7 @@ using Godot;
 using System;
 using DeckroidVania.Game.Entities.Enemies.Base;
 using DeckroidVania.Game.Entities.Enemies.Components.Interfaces;
+using DeckroidVania2.Game.Systems.GameSystems; // For HealthSystem
 
 namespace DeckroidVania.Game.Combat.Hitbox
 {

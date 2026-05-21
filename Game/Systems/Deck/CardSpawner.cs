@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using DeckroidVania2.Game.Systems.Deck.Cards;
 
 public partial class CardSpawner
 {
@@ -33,14 +34,10 @@ public partial class CardSpawner
 		}
 
 		var cardInstance = (Card)_cardScene.Instantiate();
-		cardInstance.CallDeferred(
-			"Initialize",
-			cardData.CardName,
-			cardData.CardType,
-			cardData.ManaCost,
-			cardData.ActivateEffect,
-			cardData.SacrificeEffect
-		);
+		
+		cardInstance.Initialize(cardData);
+
+
 		_handManager.AddCard(cardInstance);
 	}
 }

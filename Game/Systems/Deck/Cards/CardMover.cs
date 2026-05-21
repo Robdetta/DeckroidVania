@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using DeckroidVania2.Game.Systems.Deck.Cards;
 
 public partial class CardMover
 {

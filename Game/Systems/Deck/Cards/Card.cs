@@ -1,6 +1,9 @@
 using Godot;
 using System;
 
+namespace DeckroidVania2.Game.Systems.Deck.Cards;
+
+
 public partial class Card : Control
 {
     [Export] public string CardNameText;
@@ -8,6 +11,8 @@ public partial class Card : Control
     [Export] public int ManaCostValue;
     [Export] public string ActivateEffectText;
     [Export] public string SacrificeEffectText;
+
+    
 
     private Label _cardNameLabel;
     private Label _cardTypeLabel;
@@ -87,6 +92,24 @@ public partial class Card : Control
 
         // Update the visual labels
         UpdateCard();
+    }
+
+    // Add this new overload method to your Card.cs
+    public CardData CardData { get; private set; }
+
+    public void Initialize(CardData cardData)
+    {
+        // 1. Save the reference so CardManager can access your effects list!
+        CardData = cardData;
+
+        // 2. Call your original visual initializer with the data
+        Initialize(
+            cardData.CardName, 
+            cardData.CardType, 
+            cardData.ManaCost, 
+            cardData.ActivateEffectDesc, 
+            "" // Assuming empty for now, or add SacrificeEffectDesc if it exists
+        );
     }
 
 }

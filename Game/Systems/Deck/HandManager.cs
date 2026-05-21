@@ -1,6 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters;
+using DeckroidVania2.Game.Systems.Deck.Cards;
 
 public partial class HandManager
 {

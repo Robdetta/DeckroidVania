@@ -1,6 +1,9 @@
 using Godot;
 using System.Collections.Generic;
 using System.Linq;
+using DeckroidVania2.Game.Systems.Deck.Cards;
+using DeckroidVania2.Game.Systems.Deck.Effects;
+ // For ManaSystem
 
 public partial class CardManager : Node
 {
@@ -53,7 +56,7 @@ public partial class CardManager : Node
         // Spawn the first card immediately
         _cardSpawner.SpawnCard();
 
-        // Get the InputManager	
+        // Get the InputManager 
         _inputManager = GetNode<InputManager>(_inputManagerPath);
         _inputManager.Connect(nameof(InputManager.ShuffleLeft), new Callable(this, nameof(OnShuffleLeft)));
         _inputManager.Connect(nameof(InputManager.ShuffleRight), new Callable(this, nameof(OnShuffleRight)));
@@ -116,6 +119,49 @@ public partial class CardManager : Node
             GD.Print($"Played card: {selectedCard.CardNameText}, spent {manaCost} mana!");
             GD.Print($"Hand count before removal: {_handManager.GetCardCount()}");
             
+            // --- NEW CARD EFFECT PIPELINE ---
+            // Find the player in your scene tree (assuming Player is in group "Player")
+            Node3D playerNode = GetTree().GetFirstNodeInGroup("Player") as Node3D;
+
+            if (playerNode != null)
+            {
+                // Calculate where the player is aiming.
+                // For a starting point, you can aim directly in front of the player:
+                Vector3 aimDirection = -playerNode.GlobalTransform.Basis.Z;
+                Vector3 targetPosition = playerNode.GlobalPosition + (aimDirection * 5.0f); // Default aim target 5 meters ahead
+
+                // Create our standardized Effect Context (using Node3D)
+                EffectContext context = new EffectContext(playerNode, targetPosition, GetTree());
+
+                // Execute each mechanical card effect mapped inside this card's dynamic JSON setup
+                // Try to obtain CardData from the selected card via reflection so this compiles
+                // even if Card type doesn't expose CardData directly.
+                var cardData = default(CardData);
+                var prop = selectedCard.GetType().GetProperty("CardData");
+                if (prop != null)
+                {
+                    cardData = prop.GetValue(selectedCard) as CardData;
+                }
+
+                if (cardData != null && cardData.ActivateEffects != null)
+                {
+                    // Change 'selectedCard.CardData' to 'cardData'
+                    foreach (var effectData in cardData.ActivateEffects)
+                    {
+                        ICardEffect effectLogic = EffectFactory.Create(effectData.Type);
+                        if (effectLogic != null)
+                        {
+                            effectLogic.Execute(context, effectData.Params);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                GD.PrintErr("CardManager: Could not find Player node in 'Player' group to run effects.");
+            }
+            // ---------------------------------
+
             _handManager.RemoveCard(selectedCard);
             
             GD.Print($"Hand count after removal: {_handManager.GetCardCount()}");
@@ -207,6 +253,3 @@ public partial class CardManager : Node
     {
     }
 }
-
-
-
