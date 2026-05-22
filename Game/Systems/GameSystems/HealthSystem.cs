@@ -1,39 +1,40 @@
 using Godot;
-using System;
 
 namespace DeckroidVania2.Game.Systems.GameSystems;
 
 public partial class HealthSystem : Node
-{	
-	// 1) Static Instance property
+{
+    // 1) Static Instance property
     public static HealthSystem Instance { get; private set; }
 
-	[Signal] public delegate void HealthChangedEventHandler(int current, int max);
+    [Signal] public delegate void HealthChangedEventHandler(int current, int max);
     [Signal] public delegate void DiedEventHandler();
 
     [Export] public int MaxHealth { get; set; } = 100;
     private int _current;
-    public int Current {
+    public int Current
+    {
         get => _current;
-        set {
+        set
+        {
             _current = Mathf.Clamp(value, 0, MaxHealth);
             EmitSignal(SignalName.HealthChanged, _current, MaxHealth);
             if (_current == 0) EmitSignal(SignalName.Died);
         }
     }
 
-	// Called when the node enters the scene tree for the first time.
-	public override void _Ready()
-	{	
-		Instance = this;
-		Current = MaxHealth;
-	}
+    // Called when the node enters the scene tree for the first time.
+    public override void _Ready()
+    {
+        Instance = this;
+        Current = MaxHealth;
+    }
 
-	public void TakeDamage(int amount) => Current -= amount;
-    public void Heal(int amount)       => Current += amount;
+    public void TakeDamage(int amount) => Current -= amount;
+    public void Heal(int amount) => Current += amount;
 
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
-	public override void _Process(double delta)
-	{
-	}
+    // Called every frame. 'delta' is the elapsed time since the previous frame.
+    public override void _Process(double delta)
+    {
+    }
 }
