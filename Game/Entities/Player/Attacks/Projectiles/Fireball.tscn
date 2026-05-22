@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://nvpc8qako17m"]
+[gd_scene load_steps=5 format=3 uid="uid://bdlh1rky4qtmp"]
 
 [ext_resource type="Script" uid="uid://btynd5x0fmyn" path="res://Game/Entities/Player/Attacks/Projectiles/Projectile.cs" id="1_kn50h"]
 
