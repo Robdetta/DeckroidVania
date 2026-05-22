@@ -17,6 +17,7 @@ public class AttackData
     public string ProjectileScene { get; set; } // Path/UID to projectile scene
     public float[] HitboxSize { get; set; }      // Use float[] instead of Vector3
     public float[] HitboxOffset { get; set; }    // Use float[] instead of Vector3
+    public float? HitBoxLifetime { get; set; } // Optional lifetime for hitbox, if different from attack duration   
 
     public float KnockbackForce { get; set; } 
     public float KnockbackDuration { get; set; }

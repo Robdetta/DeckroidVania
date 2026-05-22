@@ -14,7 +14,7 @@ namespace DeckroidVania.Game.Combat.Hitbox
         private HitboxData _data;
         private float _lifetimeRemaining;
         private bool _enabled = false;
-        private string _targetGroup = "Player";
+        private string _targetGroup = "Player"; // Default, but overridden in Initialize
 
         public void Initialize(HitboxData data, string targetGroup = "Player")
         {
@@ -44,8 +44,34 @@ namespace DeckroidVania.Game.Combat.Hitbox
             // Connect signals
             _hitboxArea.BodyEntered += OnBodyEntered;
 
+            // --- DYNAMICALLY SET COLLISION LAYERS/MASKS BASED ON TARGET GROUP ---
+            if (_targetGroup == "Enemy") // This Hitbox is for a Player's attack, targets Enemies
+            {
+                // Player's "Hit box" is Layer 3, masks Enemy (Layer 2)
+                _hitboxArea.CollisionLayer = (uint)Math.Pow(2, 2); // Layer 3 (value 4)
+                _hitboxArea.CollisionMask = (uint)Math.Pow(2, 1);  // Mask Layer 2 (value 2)
+                GD.PrintErr($"HitboxComponent DEBUG: Player Attack Hitbox - Layer: {_hitboxArea.CollisionLayer} (Layer 3), Mask: {_hitboxArea.CollisionMask} (Mask Layer 2)");
+            }
+            else if (_targetGroup == "Player") // This Hitbox is for an Enemy's attack, targets Player
+            {
+                // Enemy attack should be on Layer 2, masks Player (Layer 1)
+                _hitboxArea.CollisionLayer = (uint)Math.Pow(2, 1); // Layer 2 (value 2)
+                _hitboxArea.CollisionMask = (uint)Math.Pow(2, 0);  // Mask Layer 1 (value 1)
+                GD.PrintErr($"HitboxComponent DEBUG: Enemy Attack Hitbox - Layer: {_hitboxArea.CollisionLayer} (Layer 2), Mask: {_hitboxArea.CollisionMask} (Mask Layer 1)");
+            }
+            else
+            {
+                GD.PrintErr($"HitboxComponent DEBUG: Unknown targetGroup '{_targetGroup}'. Defaulting to Player Attack layers/masks.");
+                // Default to player attack behavior if targetGroup is unexpected
+                _hitboxArea.CollisionLayer = (uint)Math.Pow(2, 2); // Layer 3 (value 4)
+                _hitboxArea.CollisionMask = (uint)Math.Pow(2, 1);  // Mask Layer 2 (value 2)
+            }
+            // --- END DYNAMICALLY SET COLLISION LAYERS/MASKS ---
+
             // Enable immediately
             Enable();
+
+            GD.Print($"HitboxComponent Initialized: TargetGroup='{_targetGroup}', Damage={_data.Damage}, Lifetime={_data.Lifetime}, Size={_data.Size}, Offset={_data.Offset}, KnockbackForce={_data.KnockbackForce}, KnockbackDuration={_data.KnockbackDuration}");
         }
 
         public override void _Process(double delta)
@@ -78,8 +104,14 @@ namespace DeckroidVania.Game.Combat.Hitbox
 
         private void OnBodyEntered(Node3D body)
         {
+            GD.Print($"HitboxComponent OnBodyEntered: Hit {body.Name}, Group Check for '{_targetGroup}'");
+
             if (!_enabled) return;
-            if (!body.IsInGroup(_targetGroup)) return;
+            if (!body.IsInGroup(_targetGroup))
+            {
+                GD.Print($"HitboxComponent: Body {body.Name} is not in target group '{_targetGroup}'.");
+                return;
+            }
 
             // Apply damage based on target group
             if (body.IsInGroup("Player"))
@@ -88,6 +120,7 @@ namespace DeckroidVania.Game.Combat.Hitbox
                 if (HealthSystem.Instance != null)
                 {
                     HealthSystem.Instance.TakeDamage(_data.Damage);
+                    GD.Print($"HitboxComponent: Player hit for {_data.Damage} damage.");
                 }
             }
             else if (body.IsInGroup("Enemy"))
@@ -96,17 +129,18 @@ namespace DeckroidVania.Game.Combat.Hitbox
                 if (body.HasMethod("TakeDamage"))
                 {
                     Vector3 attackerPos = GetParent<Node3D>()?.GlobalPosition ?? GlobalPosition;
-                    body.Call("TakeDamage", _data.Damage, 50f, 0.3f, attackerPos);
+                    // Ensure KnockbackForce and KnockbackDuration are passed
+                    body.Call("TakeDamage", _data.Damage, _data.KnockbackForce, _data.KnockbackDuration, attackerPos);
+                    GD.Print($"HitboxComponent: Enemy {body.Name} hit for {_data.Damage} damage, KnockbackForce={_data.KnockbackForce}, KnockbackDuration={_data.KnockbackDuration}.");
+                }
+                else
+                {
+                    GD.PrintErr($"HitboxComponent: Enemy {body.Name} does not have a 'TakeDamage' method.");
                 }
             }
 
             // Destroy hitbox after hit
             QueueFree();
-        }
-
-        private void PrintGlobalPosition()
-        {
-            // Removed debug output
         }
 
         public override void _ExitTree()

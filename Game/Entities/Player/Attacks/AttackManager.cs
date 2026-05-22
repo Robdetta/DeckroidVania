@@ -2,6 +2,7 @@ using Godot;
 using System.Collections.Generic;
 using System.Text.Json;
 using DeckroidVania2.Game.Player;
+using DeckroidVania.Game.Combat.Hitbox;
 
 
 public class AttackManager
@@ -10,8 +11,8 @@ public class AttackManager
     private List<AttackData> _attacks = new();
     private AttackData _currentAttack;
     private WeaponManager _weaponManager;
-    private SceneTreeTimer _hitboxTimer;
-    private Hitbox _hitbox;
+    // private SceneTreeTimer _hitboxTimer;
+    // private Hitbox _hitbox;
 
 
     public AttackManager(Node owner, WeaponManager weaponManager, int defaultAttackId = 1)
@@ -19,7 +20,7 @@ public class AttackManager
         _owner = owner;
         _weaponManager = weaponManager;
         LoadAttacks();
-        _hitbox = _owner.GetNode<Hitbox>("Visual/RootNode/Hitbox");
+        // _hitbox = _owner.GetNode<Hitbox>("Visual/RootNode/Hitbox");
 
         var defaultAttack = _attacks.Find(a => a.Id == defaultAttackId);
         if (defaultAttack != null)
@@ -41,19 +42,20 @@ public class AttackManager
     public void SetAttackByName(string name)
     {
         _currentAttack = _attacks.Find(a => a.Name == name);
-        if (_currentAttack != null && !string.IsNullOrEmpty(_currentAttack.Hitbox))
-            ConfigureHitbox();
+        // if (_currentAttack != null && !string.IsNullOrEmpty(_currentAttack.Hitbox))
+        //     ConfigureHitbox();
     }
 
     public void SetAttackById(int id)
     {
         _currentAttack = _attacks.Find(a => a.Id == id);
         // Only configure hitbox for melee attacks
-        if (_currentAttack != null && !string.IsNullOrEmpty(_currentAttack.Hitbox))
-            ConfigureHitbox();
+        _currentAttack = _attacks.Find(a => a.Id == id);
+        // if (_currentAttack != null && !string.IsNullOrEmpty(_currentAttack.Hitbox))
+        //     ConfigureHitbox();
         // Optionally: disable melee hitbox if switching to projectile
-        else if (_hitbox != null)
-            _hitbox.Disable();
+        // else if (_hitbox != null)
+        //     _hitbox.Disable();
     }
 
     public void PerformAttack()
@@ -126,45 +128,118 @@ public class AttackManager
     
     public void ActivateHitbox()
     {
-        GD.Print("ActivateHitbox called");
-        if (_hitbox == null || _weaponManager == null || _currentAttack == null)
+        GD.Print("ActivateHitbox called (dynamic)");
+        if (_currentAttack == null || _weaponManager == null)
         {
-            GD.Print($"Failed to activate hitbox - Hitbox: {_hitbox != null}, WeaponManager: {_weaponManager != null}, CurrentAttack: {_currentAttack != null}");
+            GD.Print($"Failed to activate hitbox - CurrentAttack: {_currentAttack != null}, WeaponManager: {_weaponManager != null}");
             return;
         }
-        _hitbox.Enable();
-        _hitboxTimer = _owner.GetTree().CreateTimer(_currentAttack.Duration);
-        _hitboxTimer.Timeout += () => _hitbox.Disable();
-    }
 
-   private void ConfigureHitbox()
-    {
-        if (_hitbox == null || _weaponManager == null || _currentAttack == null) return;
-        // Only configure for melee attacks (not projectiles)
-        if (string.IsNullOrEmpty(_currentAttack.Hitbox)) return;
+        // Only create for melee attacks
+        if (string.IsNullOrEmpty(_currentAttack.Hitbox))
+        {
+            GD.Print("No hitbox defined for current attack, skipping dynamic hitbox creation.");
+            return;
+        }
+
         var weapon = _weaponManager.GetCurrentWeapon();
         if (weapon == null) return;
-        int finalDamage = (int)(_currentAttack.Damage * weapon.DamageMultiplier);
-        Vector3 size = _currentAttack.HitboxSizeVec;
-        Vector3 offset = _currentAttack.HitboxOffsetVec;
-        _hitbox.Configure(finalDamage, _owner, size, offset, _currentAttack.KnockbackForce, _currentAttack.KnockbackDuration);
+
+        // 1. Create HitboxData from current attack and weapon
+        var hitboxData = new HitboxData
+        {
+            Damage = (int)(_currentAttack.Damage * weapon.DamageMultiplier),
+            Size = _currentAttack.HitboxSizeVec,
+            Offset = _currentAttack.HitboxOffsetVec,
+            Lifetime = _currentAttack.HitBoxLifetime ?? 0.2f, // Use defined lifetime or default
+            KnockbackForce = _currentAttack.KnockbackForce,
+            KnockbackDuration = _currentAttack.KnockbackDuration
+            
+        };
+
+        GD.Print($"AttackManager: Preparing to spawn HitboxComponent. Target: 'Enemy', Damage: {hitboxData.Damage}, Lifetime: {hitboxData.Lifetime}");
+
+        // 2. Instantiate HitboxComponent
+        var playerHitbox = new HitboxComponent();
+
+        // 3. Find the parent node to attach the hitbox to (e.g., "Visual/RootNode" relative to the player)
+        // This path comes from your attacks.json "Hitbox" property, but we'll use a specific node
+        // on the _owner (Player) to ensure proper positioning relative to the player's animation.
+        Node3D hitboxParentNode = _owner.GetNodeOrNull<Node3D>("Visual/RootNode"); // Assuming Player has this node structure
+        if (hitboxParentNode == null)
+        {
+            GD.PrintErr("AttackManager: Could not find Visual/RootNode for hitbox attachment. Attaching to _owner directly.");
+            hitboxParentNode = _owner as Node3D; // Fallback to owner if specific node not found
+            if (hitboxParentNode == null)
+            {
+                GD.PrintErr("AttackManager: Owner is not a Node3D, cannot attach hitbox.");
+                return;
+            }
+        }
+
+        // 4. Attach to the parent node
+        hitboxParentNode.AddChild(playerHitbox);
+
+        // 5. Initialize HitboxComponent for player attacks, targeting enemies
+        // The HitboxComponent itself handles enabling and its lifetime.
+        playerHitbox.Initialize(hitboxData, "Enemy");
+
+        GD.Print($"Player spawned dynamic hitbox for {_currentAttack.Name}. Damage: {hitboxData.Damage}, Lifetime: {hitboxData.Lifetime}");
     }
+
+   // Removed or repurposed ConfigureHitbox as it's no longer needed for static configuration
+   // private void ConfigureHitbox()
+   // {
+   //    // Logic moved into ActivateHitbox
+   // }
 
    public void CancelAttack(float lingerTime = 0f)
     {
-        if (_hitbox != null)
-        {
-            if (lingerTime > 0f)
-            {
-                _owner.GetTree().CreateTimer(lingerTime).Timeout += () => _hitbox.Disable();
-            }
-            else
-            {
-                _hitbox.Disable();
-            }
-        }
-        _hitboxTimer = null;
+        // No longer need to manually disable a static hitbox, as dynamic ones despawn themselves.
+        // If there's other attack cancellation logic needed, it would go here.
+        GD.Print("Attack cancelled. Dynamic hitboxes will despawn on their own.");
     }
+//     public void ActivateHitbox()
+//     {
+//         GD.Print("ActivateHitbox called");
+//         if (_hitbox == null || _weaponManager == null || _currentAttack == null)
+//         {
+//             GD.Print($"Failed to activate hitbox - Hitbox: {_hitbox != null}, WeaponManager: {_weaponManager != null}, CurrentAttack: {_currentAttack != null}");
+//             return;
+//         }
+//         _hitbox.Enable();
+//         _hitboxTimer = _owner.GetTree().CreateTimer(_currentAttack.Duration);
+//         _hitboxTimer.Timeout += () => _hitbox.Disable();
+//     }
+
+//    private void ConfigureHitbox()
+//     {
+//         if (_hitbox == null || _weaponManager == null || _currentAttack == null) return;
+//         // Only configure for melee attacks (not projectiles)
+//         if (string.IsNullOrEmpty(_currentAttack.Hitbox)) return;
+//         var weapon = _weaponManager.GetCurrentWeapon();
+//         if (weapon == null) return;
+//         int finalDamage = (int)(_currentAttack.Damage * weapon.DamageMultiplier);
+//         Vector3 size = _currentAttack.HitboxSizeVec;
+//         Vector3 offset = _currentAttack.HitboxOffsetVec;
+//         _hitbox.Configure(finalDamage, _owner, size, offset, _currentAttack.KnockbackForce, _currentAttack.KnockbackDuration);
+//     }
+
+//    public void CancelAttack(float lingerTime = 0f)
+//     {
+//         if (_hitbox != null)
+//         {
+//             if (lingerTime > 0f)
+//             {
+//                 _owner.GetTree().CreateTimer(lingerTime).Timeout += () => _hitbox.Disable();
+//             }
+//             else
+//             {
+//                 _hitbox.Disable();
+//             }
+//         }
+//         _hitboxTimer = null;
+//     }
 
     public AttackData GetCurrentAttack() => _currentAttack;
 }
