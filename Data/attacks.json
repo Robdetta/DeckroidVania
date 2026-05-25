@@ -10,7 +10,7 @@
     "Hitbox": "Player/Visual/RootNode/Hitbox",
     "HitboxSize": [1, 1, 1],
     "HitboxOffset": [1, 2, 1],
-    "HitBoxLifetime": 1.2,
+    "HitBoxLifetime": 0.2,
     "KnockbackForce": 20,
     "KnockbackDuration": 0.1
   },

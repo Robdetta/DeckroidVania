@@ -29,7 +29,7 @@ public partial class Card : Control
         _cardNameLabel = GetNode<Label>("CardVisuals/Name/CardName");
         _cardTypeLabel = GetNode<Label>("CardVisuals/Type/CardType");
         _manaCostLabel = GetNode<Label>("CardVisuals/Mana/ManaCost");
-        _activateEffectLabel = GetNode<Label>("CardVisuals/Activate/ActivateEffect");
+        _activateEffectLabel = GetNode<Label>("CardVisuals/Activate/ActivateEffectDesc");
         _sacrificeEffectLabel = GetNode<Label>("CardVisuals/Sacrifice/SacrificeEffect");
         _cardArtSprite = GetNode<Sprite2D>("CardVisuals/CardArt");
 

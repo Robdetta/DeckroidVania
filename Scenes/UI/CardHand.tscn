@@ -10,10 +10,10 @@
 [node name="CardDisplay" type="Control" parent="CardUI"]
 layout_mode = 3
 anchors_preset = 0
-offset_left = 36.0
-offset_top = 769.0
-offset_right = 1116.0
-offset_bottom = 1053.0
+offset_left = 20.0
+offset_top = 655.0
+offset_right = 1100.0
+offset_bottom = 939.0
 
 [node name="SlotArea" type="Node2D" parent="CardUI/CardDisplay"]
 

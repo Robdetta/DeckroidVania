@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://pi5b3ukve1re"]
 
-[ext_resource type="Texture2D" uid="uid://c1uk11hpgxbht" path="res://Assets/cardmockup1.png" id="1_57tax"]
+[ext_resource type="Texture2D" uid="uid://c1uk11hpgxbht" path="res://Assets/Assets/cardmockup1.png" id="1_57tax"]
 [ext_resource type="Script" uid="uid://btavibicnjmod" path="res://Game/Systems/Deck/Cards/Card.cs" id="1_enxpg"]
 
 [node name="Card" type="Control"]
@@ -32,10 +32,10 @@ horizontal_alignment = 2
 [node name="Name" type="Node2D" parent="CardVisuals"]
 
 [node name="CardName" type="Label" parent="CardVisuals/Name"]
-offset_left = 70.0
+offset_left = 50.0
 offset_top = 10.0
-offset_right = 318.0
-offset_bottom = 52.0
+offset_right = 130.0
+offset_bottom = 45.0
 scale = Vector2(2, 2)
 
 [node name="CardArt" type="Sprite2D" parent="CardVisuals"]
@@ -48,12 +48,16 @@ offset_bottom = 23.0
 
 [node name="Activate" type="Node2D" parent="CardVisuals"]
 
-[node name="ActivateEffect" type="Label" parent="CardVisuals/Activate"]
-offset_right = 40.0
-offset_bottom = 23.0
+[node name="ActivateEffectDesc" type="Label" parent="CardVisuals/Activate"]
+offset_left = 40.0
+offset_top = 150.0
+offset_right = 180.0
+offset_bottom = 270.0
 
 [node name="Sacrifice" type="Node2D" parent="CardVisuals"]
 
 [node name="SacrificeEffect" type="Label" parent="CardVisuals/Sacrifice"]
-offset_right = 40.0
-offset_bottom = 23.0
+offset_left = 30.0
+offset_top = 150.0
+offset_right = 190.0
+offset_bottom = 280.0

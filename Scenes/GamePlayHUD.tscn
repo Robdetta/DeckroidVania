@@ -24,9 +24,9 @@ texture_progress = ExtResource("2_yvfvk")
 [node name="DeckCountLabel" type="Label" parent="."]
 anchors_preset = -1
 anchor_bottom = 0.575
-offset_left = 55.0
-offset_top = 698.0
-offset_right = 246.0
-offset_bottom = 718.0
+offset_left = 22.0
+offset_top = 565.0
+offset_right = 213.0
+offset_bottom = 585.0
 theme_override_font_sizes/font_size = 30
 text = "Deck: 0/0"
