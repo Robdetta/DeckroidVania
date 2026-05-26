@@ -65,8 +65,19 @@
     "cardName": "Elemental Fury",
     "type": "Core Card - Elemental Power",
     "manaCost": 6,
-    "activateEffect": "Deals 40 damage to all enemies and applies Burn status for 5 seconds.",
-    "sacrificeEffect": "Summons a Fire Elemental to fight alongside the player."
+    "activateEffectsDesc": "Deals 40 damage to all enemies and applies Burn status for 5 seconds.",
+    "activateEffects": [
+      {
+        "type": "MeleeAttack",
+        "params": {
+          "attackId": 1,
+          "visualEffectScenePath": "res://Game/Systems/Deck/CardEffects/CardEffectMelee/Axe/AxeChopEffect.tscn",
+          "animationName": "AxeChop",
+          "controllerScenePath": "res://Game/Systems/Deck/CardEffects/CardMeleeEffect.tscn"
+        }
+      }
+    ],
+    "sacrificeEffect": "Sacrifices 25% health to deal double damage to enemies."
   },
   {
     "id": 6,

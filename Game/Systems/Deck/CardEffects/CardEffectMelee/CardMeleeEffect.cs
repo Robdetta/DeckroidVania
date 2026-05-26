@@ -1,6 +1,5 @@
 using Godot;
 using System;
-using DeckroidVania.Game.Combat.Hitbox; // Needed for AttackData
 using DeckroidVania.Game.Attacks;
 using DeckroidVania2.Game.Systems.Deck.CardEffects;
 using PlayerClass = DeckroidVania2.Game.Player.Player; // Needed to cast _attacker to Player for IsFacingRight()
@@ -34,6 +33,27 @@ public partial class CardMeleeEffect : Node3D
         _attackData = attackData;
         _attacker = attacker; 
 
+        // --- FIX 1: Orient this CardMeleeEffect node itself based on player facing ---
+        if (_attacker is PlayerClass player)
+        {
+            // Set the global position of this CardMeleeEffect to match the player's.
+            GlobalPosition = player.GlobalPosition;
+
+            // Explicitly set rotation based on player's facing direction.
+            // Assuming IsFacingRight() controls a visual flip or Y-rotation on the player.
+            // If player faces right, RotationDegrees.Y = 0 (or original model orientation).
+            // If player faces left, RotationDegrees.Y = 180 degrees.
+            if (!player.IsFacingRight())
+            {
+                RotationDegrees = new Vector3(RotationDegrees.X, 180, RotationDegrees.Z); // Rotate 180 degrees around Y-axis
+            }
+            else
+            {
+                RotationDegrees = new Vector3(RotationDegrees.X, 0, RotationDegrees.Z); // Ensure no extra Y-rotation if facing right
+            }
+        }
+
+
         PackedScene visualEffectPackedScene = GD.Load<PackedScene>(visualEffectScenePath);
 
         if (visualEffectPackedScene == null)
@@ -46,26 +66,19 @@ public partial class CardMeleeEffect : Node3D
         _visualEffectInstance = visualEffectPackedScene.Instantiate<Node3D>();
         
         // Add the specific visual (e.g., dagger) as a child of this controller node.
-        // This means _visualEffectInstance's position is relative to CardMeleeEffect.
+        // This means _visualEffectInstance's position is local to CardMeleeEffect.
         AddChild(_visualEffectInstance);
 
-        // --- FIX: Position the visual effect using the AttackData's offset ---
+        // --- FIX 2: Apply the offset LOCALLY to _visualEffectInstance ---
         // Get the base offset from attacks.json
-        Vector3 finalOffset = _attackData.HitboxOffsetVec;
+        // This offset is now relative to the CardMeleeEffect's (player-aligned) local space.
+        Vector3 localOffset = _attackData.HitboxOffsetVec;
+        
+        // Apply this local offset to the visual effect instance.
+        _visualEffectInstance.Position = localOffset;
+        
+        GD.Print($"CardMeleeEffect DEBUG: Visual spawned with local offset {localOffset}.");
 
-        // Adjust X-offset based on player's facing direction
-        if (_attacker is PlayerClass player) // Check if the attacker is indeed your Player class
-        {
-            // Assuming IsFacingRight() returns true for right, false for left.
-            // And that a positive X offset means 'right' in attacks.json.
-            if (!player.IsFacingRight())
-            {
-                finalOffset.X *= -1; // Flip X-component of the offset if facing left
-            }
-        }
-        // Apply this final offset to the visual effect instance.
-        // Its position is local to its parent (this CardMeleeEffect node).
-        _visualEffectInstance.Position = finalOffset;
 
         // --- Find and play the animation ---
         _animationPlayer = _visualEffectInstance.GetNode<AnimationPlayer>("AnimationPlayer"); // Assuming "AnimationPlayer" is the correct name in your visual effect scene
@@ -80,7 +93,7 @@ public partial class CardMeleeEffect : Node3D
         _animationPlayer.Play(animationName);
         _animationPlayer.AnimationFinished += OnAnimationFinished; // Connect the cleanup signal
 
-        GD.Print($"CardMeleeEffect: Started '{animationName}' animation from '{visualEffectScenePath}'. Visual spawned at local offset {finalOffset}.");
+        GD.Print($"CardMeleeEffect: Started '{animationName}' animation from '{visualEffectScenePath}'.");
     }
 
     /// <summary>
@@ -110,7 +123,6 @@ public partial class CardMeleeEffect : Node3D
         {
             _animationPlayer.AnimationFinished -= OnAnimationFinished; // Disconnect the signal
         }
-        // --- FIX: Add QueueFree() to make the effect disappear ---
         QueueFree(); // Remove this CardMeleeEffect node (and its children, including the visual)
     }
 }
