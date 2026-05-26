@@ -12,7 +12,18 @@
     "cardName": "Divine Strike",
     "type": "Core Card - Holy Power",
     "manaCost": 3,
-    "activateEffect": "Deals 50 damage to all enemies within a radius.",
+    "activateEffectDesc": "Deals 50 damage to all enemies within a radius.",
+    "activateEffects": [
+      {
+        "type": "MeleeAttack",
+        "params": {
+          "attackId": 1,
+          "visualEffectScenePath": "res://Game/Systems/Deck/CardEffects/CardEffectMelee/Dagger/DaggerSwingEffect.tscn",
+          "animationName": "DaggerSwing",
+          "controllerScenePath": "res://Game/Systems/Deck/CardEffects/CardMeleeEffect.tscn"
+        }
+      }
+    ],
     "sacrificeEffect": "Sacrifices 25% health to deal double damage to enemies."
   },
   {

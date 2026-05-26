@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://bmhoxvaey2qm2"]
+
+[node name="CardMeleeEffect" type="Node3D"]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]

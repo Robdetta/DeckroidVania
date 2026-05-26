@@ -1,8 +1,10 @@
 using Godot;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using DeckroidVania2.Game.Systems.Deck.Cards;
 using DeckroidVania2.Game.Systems.Deck.Effects;
+using DeckroidVania2.Game.Systems.Deck.CardEffects;
  // For ManaSystem
 
 public partial class CardManager : Node
@@ -11,6 +13,8 @@ public partial class CardManager : Node
     public delegate void DeckCountChangedEventHandler(int current, int total);
     [Export] private PackedScene _cardScene = GD.Load<PackedScene>("uid://pi5b3ukve1re");
     [Export] private NodePath _inputManagerPath;
+
+    //[Export] private PackedScene _cardMeleeEffectScene = GD.Load<PackedScene>("res://Game/Systems/Deck/CardEffects/CardMeleeEffect.tscn");
     public static CardManager Instance { get; private set; }
 
 
@@ -109,77 +113,85 @@ public partial class CardManager : Node
         _spawnTimer.WaitTime = interval;
     }
 
-    private void OnActivateCard()
-    {
-        var selectedCard = _handManager.GetHighlightedCard();
-        if (selectedCard == null)
-            return;
-
-        int manaCost = selectedCard.ManaCostValue;
-
-        if (ManaSystem.Instance.Current >= manaCost)
+        private void OnActivateCard()
         {
-            ManaSystem.Instance.SpendMana(manaCost);
-            GD.Print($"=== CARD PLAYED ===");
-            GD.Print($"Played card: {selectedCard.CardNameText}, spent {manaCost} mana!");
-            GD.Print($"Hand count before removal: {_handManager.GetCardCount()}");
-            
-            // --- NEW CARD EFFECT PIPELINE ---
-            // Find the player in your scene tree (assuming Player is in group "Player")
-            Node3D playerNode = GetTree().GetFirstNodeInGroup("Player") as Node3D;
+            var selectedCard = _handManager.GetHighlightedCard();
+            if (selectedCard == null)
+                return;
 
-            if (playerNode != null)
+            int manaCost = selectedCard.ManaCostValue;
+
+            if (ManaSystem.Instance.Current >= manaCost)
             {
-                // Calculate where the player is aiming.
-                // For a starting point, you can aim directly in front of the player:
-                Vector3 aimDirection = -playerNode.GlobalTransform.Basis.Z;
-                Vector3 targetPosition = playerNode.GlobalPosition + (aimDirection * 5.0f); // Default aim target 5 meters ahead
+                ManaSystem.Instance.SpendMana(manaCost);
+                GD.Print($"=== CARD PLAYED ===");
+                GD.Print($"Played card: {selectedCard.CardNameText}, spent {manaCost} mana!");
+                GD.Print($"Hand count before removal: {_handManager.GetCardCount()}");
+                
+                // --- NEW CARD EFFECT PIPELINE ---
+                Node3D playerNode = GetTree().GetFirstNodeInGroup("Player") as Node3D;
 
-                // Create our standardized Effect Context (using Node3D)
-                EffectContext context = new EffectContext(playerNode, targetPosition, GetTree());
-
-                // Execute each mechanical card effect mapped inside this card's dynamic JSON setup
-                // Try to obtain CardData from the selected card via reflection so this compiles
-                // even if Card type doesn't expose CardData directly.
-                var cardData = default(CardData);
-                var prop = selectedCard.GetType().GetProperty("CardData");
-                if (prop != null)
+                if (playerNode != null)
                 {
-                    cardData = prop.GetValue(selectedCard) as CardData;
-                }
+                    Vector3 aimDirection = -playerNode.GlobalTransform.Basis.Z;
+                    Vector3 targetPosition = playerNode.GlobalPosition + (aimDirection * 5.0f);
+                    EffectContext context = new EffectContext(playerNode, targetPosition, GetTree());
 
-                if (cardData != null && cardData.ActivateEffects != null)
-                {
-                    // Change 'selectedCard.CardData' to 'cardData'
-                    foreach (var effectData in cardData.ActivateEffects)
+                    CardData cardData = default(CardData);
+                    PropertyInfo prop = selectedCard.GetType().GetProperty("CardData");
+                    if (prop != null)
                     {
-                        ICardEffect effectLogic = EffectFactory.Create(effectData.Type);
-                        if (effectLogic != null)
-                        {
-                            effectLogic.Execute(context, effectData.Params);
-                        }
+                        cardData = prop.GetValue(selectedCard) as CardData;
+                    }
+
+                    _ExecuteCardEffects(playerNode, context, cardData);
+                }
+                else
+                {
+                    GD.PrintErr("CardManager: Could not find Player node in 'Player' group to run effects.");
+                }
+                // ---------------------------------
+
+                _handManager.RemoveCard(selectedCard);
+                
+                GD.Print($"Hand count after removal: {_handManager.GetCardCount()}");
+                GD.Print($"Deck count: {_deckManager.GetDeckCount()}");
+                GD.Print($"==================");
+                
+                StartSpawning();
+            }
+            else
+            {
+                GD.Print("Not enough mana to play this card!");
+            }
+        }
+
+        private void _ExecuteCardEffects(Node3D playerNode, EffectContext context, CardData cardData)
+        {
+            if (cardData != null && cardData.ActivateEffects != null)
+            {
+                foreach (var effectData in cardData.ActivateEffects)
+                {
+                    // Here, we use the EffectFactory to create the correct ICardEffect implementation
+                    // based on the 'type' string from the JSON.
+                    ICardEffect effectLogic = EffectFactory.Create(effectData.Type);
+                    if (effectLogic != null)
+                    {
+                        // The effectLogic (e.g., ProjectileEffect, MeleeAttackEffect)
+                        // handles all the specific details of its execution.
+                        effectLogic.Execute(context, effectData.Params);
+                    }
+                    else
+                    {
+                        GD.PrintErr($"CardManager: No ICardEffect implementation registered for type: '{effectData.Type}'");
                     }
                 }
             }
             else
             {
-                GD.PrintErr("CardManager: Could not find Player node in 'Player' group to run effects.");
+                GD.PrintErr("CardManager: CardData or ActivateEffects is null for the played card, no effects executed.");
             }
-            // ---------------------------------
-
-            _handManager.RemoveCard(selectedCard);
-            
-            GD.Print($"Hand count after removal: {_handManager.GetCardCount()}");
-            GD.Print($"Deck count: {_deckManager.GetDeckCount()}");
-            GD.Print($"==================");
-            
-            StartSpawning();
         }
-        else
-        {
-            GD.Print("Not enough mana to play this card!");
-        }
-    }
 
     private void OnSpawnTimerTimeout()
     {
@@ -212,6 +224,8 @@ public partial class CardManager : Node
         if (_handManager.IsFull)
             _spawnTimer.Stop();
     }
+
+
 
     public int GetDeckCount()
     {

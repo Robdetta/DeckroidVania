@@ -15,8 +15,8 @@ public static class EffectFactory
         {
             case "Heal":
                 return new HealEffect();
-            case "Melee":
-                return new MeleeEffect();
+            case "MeleeAttack":
+                return new MeleeAttackEffect();
             case "Projectile":
                 return new ProjectileEffect();
             case "ApplyBuff":
