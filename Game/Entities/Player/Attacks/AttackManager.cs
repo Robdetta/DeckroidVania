@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using DeckroidVania2.Game.Player;
 using DeckroidVania.Game.Combat.Hitbox;
+using DeckroidVania.Game.Attacks;
 
 
 public class AttackManager

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using DeckroidVania.Game.Combat.Hitbox; // For AttackData
+using DeckroidVania.Game.Attacks;
 
 // This static class is responsible for loading all attack data from attacks.json
 public static class AttackLoader

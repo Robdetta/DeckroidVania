@@ -1,4 +1,7 @@
 using Godot;
+using System.Text.Json.Serialization; 
+
+namespace DeckroidVania.Game.Attacks;
 
 public class AttackData
 {

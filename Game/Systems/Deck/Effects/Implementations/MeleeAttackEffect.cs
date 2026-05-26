@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq; // Needed for .FirstOrDefault()
 using System.Text.Json; // NEW: Needed to handle JsonElement
 using DeckroidVania.Game.Combat.Hitbox; // For AttackData
+using DeckroidVania.Game.Attacks;
 using DeckroidVania2.Game.Systems.Deck.CardEffects; // For CardMeleeEffect
 using DeckroidVania2.Game.Systems.Deck.Effects; // For ICardEffect and EffectContext
 using DeckroidVania2.Game.Player; // Needed if context.Source is cast to Player for IsFacingRight() etc.
