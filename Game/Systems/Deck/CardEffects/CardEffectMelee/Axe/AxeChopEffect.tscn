@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://bsogneur016wa"]
+[gd_scene load_steps=6 format=3 uid="uid://bsogneur016wa"]
 
 [ext_resource type="PackedScene" uid="uid://bdgt08rece80c" path="res://Assets/Assets/TEST/KayKit_Adventurers_1.0_FREE/KayKit_Adventurers_1.0_FREE/Assets/fbx/axe_2handed.fbx" id="1_17v53"]
+[ext_resource type="Script" uid="uid://c2ba1tdxishuh" path="res://Game/Systems/Deck/CardEffects/CardEffectMelee/Axe/AxeChopEffect.cs" id="1_o14h7"]
 
 [sub_resource type="Animation" id="Animation_i2wn7"]
 resource_name = "AxeChop"
@@ -16,6 +17,20 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
 "values": [Vector3(0, 0, 0), Vector3(0, 0, 2.87456)]
+}
+tracks/1/type = "method"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0.2),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"CallParentSpawnHitbox"
+}]
 }
 
 [sub_resource type="Animation" id="Animation_x2061"]
@@ -41,6 +56,7 @@ _data = {
 
 [node name="AxeChopEffect" type="Node3D"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+script = ExtResource("1_o14h7")
 
 [node name="axe_2handed" parent="." instance=ExtResource("1_17v53")]
 

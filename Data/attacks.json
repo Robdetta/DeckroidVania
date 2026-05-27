@@ -28,5 +28,35 @@
     "ProjectileColor": "#FF00FF",
     "KnockbackForce": 30.0,
     "KnockbackDuration": 0.1
+  },
+  {
+    "Id": 3,
+    "Name": "Dagger Swing",
+    "Damage": 15,
+    "Range": 2.0,
+    "Animation": "Attack",
+    "Duration": 1.0,
+    "Lockout": 0.0,
+    "Hitbox": "Player/Visual/RootNode/Hitbox",
+    "HitboxSize": [1, 2, 1],
+    "HitboxOffset": [1, 2, 1],
+    "HitBoxLifetime": 0.2,
+    "KnockbackForce": 20,
+    "KnockbackDuration": 0.1
+  },
+  {
+    "Id": 4,
+    "Name": "Axe Swing",
+    "Damage": 30,
+    "Range": 2.0,
+    "Animation": "Attack",
+    "Duration": 1.0,
+    "Lockout": 0.0,
+    "Hitbox": "Player/Visual/RootNode/Hitbox",
+    "HitboxSize": [2, 2, 1],
+    "HitboxOffset": [1, 2, 1],
+    "HitBoxLifetime": 0.2,
+    "KnockbackForce": 20,
+    "KnockbackDuration": 0.1
   }
 ]

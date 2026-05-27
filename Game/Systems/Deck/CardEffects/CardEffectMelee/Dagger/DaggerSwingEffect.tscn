@@ -1,5 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://bmjgwkxtpf6xe"]
+[gd_scene load_steps=6 format=3 uid="uid://bmjgwkxtpf6xe"]
 
+[ext_resource type="Script" uid="uid://o5fhmd62kjx6" path="res://Game/Systems/Deck/CardEffects/CardEffectMelee/Dagger/DaggerSwingEffect.cs" id="1_i4jeh"]
 [ext_resource type="PackedScene" uid="uid://po0ddgpctdm4" path="res://Assets/Assets/TEST/KayKit_Adventurers_1.0_FREE/KayKit_Adventurers_1.0_FREE/Assets/fbx/dagger.fbx" id="1_qpnog"]
 
 [sub_resource type="Animation" id="Animation_qpnog"]
@@ -24,9 +25,12 @@ tracks/1/path = NodePath("../..")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(),
-"transitions": PackedFloat32Array(),
-"values": []
+"times": PackedFloat32Array(0.1),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"CallParentSpawnHitbox"
+}]
 }
 
 [sub_resource type="Animation" id="Animation_i4jeh"]
@@ -40,8 +44,10 @@ _data = {
 
 [node name="DaggerSwingEffect" type="Node3D"]
 transform = Transform3D(-0.959314, 0, -0.282342, 0, 1, 0, 0.282342, 0, -0.959314, 0, 0, 0)
+script = ExtResource("1_i4jeh")
 
 [node name="dagger" parent="." instance=ExtResource("1_qpnog")]
+transform = Transform3D(0.207909, -0.978148, 0, 0.978148, 0.207909, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="dagger"]
 

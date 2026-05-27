@@ -17,7 +17,7 @@
       {
         "type": "MeleeAttack",
         "params": {
-          "attackId": 1,
+          "attackId": 3,
           "visualEffectScenePath": "res://Game/Systems/Deck/CardEffects/CardEffectMelee/Dagger/DaggerSwingEffect.tscn",
           "animationName": "DaggerSwing",
           "controllerScenePath": "res://Game/Systems/Deck/CardEffects/CardMeleeEffect.tscn"
@@ -55,7 +55,7 @@
           "knockbackForce": 10.0,
           "knockbackDuration": 0.2,
           "color": "#FF4500",
-          "spawnOffset": [1.5, 1.0, 0]
+          "spawnOffset": [0, 0, 0]
         }
       }
     ],
@@ -71,7 +71,7 @@
       {
         "type": "MeleeAttack",
         "params": {
-          "attackId": 1,
+          "attackId": 4,
           "visualEffectScenePath": "res://Game/Systems/Deck/CardEffects/CardEffectMelee/Axe/AxeChopEffect.tscn",
           "animationName": "AxeChop",
           "controllerScenePath": "res://Game/Systems/Deck/CardEffects/CardMeleeEffect.tscn"
