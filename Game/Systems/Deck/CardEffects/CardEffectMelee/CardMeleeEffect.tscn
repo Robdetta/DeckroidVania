@@ -1,5 +1,6 @@
-[gd_scene format=3 uid="uid://bmhoxvaey2qm2"]
+[gd_scene load_steps=2 format=3 uid="uid://bmhoxvaey2qm2"]
+
+[ext_resource type="Script" uid="uid://cb1gyqpb43dl5" path="res://Game/Systems/Deck/CardEffects/CardEffectMelee/CardMeleeEffect.cs" id="1_p2dvo"]
 
 [node name="CardMeleeEffect" type="Node3D"]
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+script = ExtResource("1_p2dvo")

@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using DeckroidVania.Game.Attacks;
+using DeckroidVania.Game.Combat.Hitbox; 
 using DeckroidVania2.Game.Systems.Deck.CardEffects;
 using PlayerClass = DeckroidVania2.Game.Player.Player; // Needed to cast _attacker to Player for IsFacingRight()
 
@@ -9,7 +10,7 @@ namespace DeckroidVania2.Game.Systems.Deck.CardEffects;
 public partial class CardMeleeEffect : Node3D
 {
     private AttackData _attackData;
-    private Node3D _attacker; // This will be the Player node
+    private Node3D _attacker; // This will be the Plaer node
 
     private Node3D _visualEffectInstance;
     private AnimationPlayer _animationPlayer;
@@ -104,13 +105,39 @@ public partial class CardMeleeEffect : Node3D
     {
         GD.Print($"CardMeleeEffect: SpawnHitbox called by animation event for attack '{_attackData?.Name}'.");
 
-        // --- TODO: Implement hitbox spawning here, similar to AttackManager.ActivateHitbox() ---
-        // This will be our next step after confirming animation/despawn/position.
+        // 1. Validate essential data (_attackData and _attacker should not be null)
+        if (_attackData == null || _attacker == null)
+        {
+            GD.PrintErr("CardMeleeEffect: Cannot spawn hitbox; attack data or attacker is null. Aborting hitbox spawn.");
+            return;
+        }
 
-        // For now, if you want to see if the event fires:
-        // GD.Print("Hitbox spawning event triggered!");
+        // 2. Create HitboxData from _attackData.
+        var hitboxData = new HitboxData
+        {
+            Damage = _attackData.Damage,
+            Size = _attackData.HitboxSizeVec,
+            Offset = _attackData.HitboxOffsetVec,
+            Lifetime = _attackData.HitBoxLifetime ?? 0.2f, // Use defined lifetime or a default
+            KnockbackForce = _attackData.KnockbackForce,
+            KnockbackDuration = _attackData.KnockbackDuration
+        };
+
+        // 3. Instantiate a new HitboxComponent.
+        var cardHitbox = new HitboxComponent();
+
+        // 4. Add the HitboxComponent as a child of this CardMeleeEffect node.
+        //    This ensures the hitbox moves and rotates with the visual effect.
+        AddChild(cardHitbox);
+
+        // 5. Initialize the HitboxComponent.
+        //    The target group should be "Enemy" for player-originated attacks.
+        //    The HitboxComponent itself handles its position (relative to its parent),
+        //    duration, and damage logic after initialization.
+        cardHitbox.Initialize(hitboxData, "Enemy");
+
+        GD.Print($"CardMeleeEffect: Spawned HitboxComponent for '{_attackData.Name}'. Damage: {hitboxData.Damage}, Lifetime: {hitboxData.Lifetime}, Target: 'Enemy'.");
     }
-
     /// <summary>
     /// Called when the animation played by _animationPlayer finishes.
     /// Used for cleaning up this effect node.

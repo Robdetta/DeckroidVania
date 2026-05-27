@@ -54,7 +54,8 @@
           "lifetime": 10.0,
           "knockbackForce": 10.0,
           "knockbackDuration": 0.2,
-          "color": "#FF4500"
+          "color": "#FF4500",
+          "spawnOffset": [1.5, 1.0, 0]
         }
       }
     ],
