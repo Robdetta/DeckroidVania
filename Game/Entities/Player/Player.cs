@@ -26,7 +26,7 @@ public partial class Player : CharacterBody3D
     private WeaponManager _weaponManager;
     private ActionState _currentActionState = ActionState.None;
     private float _actionTimer = 0f;
-    private PlayerState _stateBeforeLock;
+    // REMOVED: private PlayerState _stateBeforeLock; // No longer needed
     public bool IsFacingRight() => _movementController._faceRight;
 
     public override void _Ready()
@@ -49,28 +49,14 @@ public partial class Player : CharacterBody3D
     {
         // Called every frame. Delta is time since the last frame.
         // Update game logic here.
-        //animationTree.Set("parameters/StateMachine/GroundMovement/blend_position", Mathf.Abs(Velocity.X));
-
 
         // Get the current movement state
         var currentState = _movementController.CurrentState;
 
-        if (_currentActionState == ActionState.Attacking)
-        {
-            switch (currentState)
-            {
-                case PlayerState.Dashing:
-                case PlayerState.Jumping:
-                case PlayerState.Falling:
-                case PlayerState.Tumble:
-                case PlayerState.Normal:
-                    if (Mathf.Abs(Velocity.X) > 0.01f || Mathf.Abs(Velocity.Z) > 0.01f)
-                        ForceCancelAttack();
-                    break;
-            }
-        }
+        // REMOVED: Old attack-canceling logic based on movement state.
+        // This is now handled by MovementController.IsMovementLocked and AttackData.AllowMovement.
 
-        // Handle action state first
+        // Handle action state first (upper body animation control)
         if (_currentActionState != ActionState.None)
         {
             _actionTimer -= (float)delta;
@@ -78,52 +64,53 @@ public partial class Player : CharacterBody3D
             {
                 EndActionState();
             }
-            // Play attack/cast animation, block movement animation changes
-            return;
+            // REMOVED: 'return;' statement. Locomotion should still update if movement is allowed.
         }
 
+        // Always update locomotion animation blends, even if an action is happening
         playerAnimationTree.SetGroundBlend(Mathf.Abs(Velocity.X));
         playerAnimationTree.SetAirborneBlend(Velocity.Y);
 
 
+        // Control locomotion animations based on movement controller state
         switch (currentState)
         {
             case PlayerState.Dashing:
-                if (playerAnimationTree.CurrentState != PlayerAnimationTree.AnimationState.Dash)
+                if (playerAnimationTree.CurrentLocomotionState != PlayerAnimationTree.LocomotionAnimationState.Dash)
                 {
-                    playerAnimationTree.ChangeState(PlayerAnimationTree.AnimationState.Dash);
+                    playerAnimationTree.ChangeLocomotionState(PlayerAnimationTree.LocomotionAnimationState.Dash);
                 }
                 break;
 
             case PlayerState.Jumping:
-                if (playerAnimationTree.CurrentState != PlayerAnimationTree.AnimationState.Airborne)
+                if (playerAnimationTree.CurrentLocomotionState != PlayerAnimationTree.LocomotionAnimationState.Airborne)
                 {
-                    playerAnimationTree.ChangeState(PlayerAnimationTree.AnimationState.Airborne);
+                    playerAnimationTree.ChangeLocomotionState(PlayerAnimationTree.LocomotionAnimationState.Airborne);
                 }
                 break;
             case PlayerState.Normal:
-                if (playerAnimationTree.CurrentState != PlayerAnimationTree.AnimationState.Normal)
+                if (playerAnimationTree.CurrentLocomotionState != PlayerAnimationTree.LocomotionAnimationState.Idle) 
                 {
-                    playerAnimationTree.ChangeState(PlayerAnimationTree.AnimationState.Normal);
+                    playerAnimationTree.ChangeLocomotionState(PlayerAnimationTree.LocomotionAnimationState.Idle); 
                 }
                 break;
             case PlayerState.Falling:
-                if (playerAnimationTree.CurrentState != PlayerAnimationTree.AnimationState.Airborne)
+                if (playerAnimationTree.CurrentLocomotionState != PlayerAnimationTree.LocomotionAnimationState.Airborne)
                 {
-                    playerAnimationTree.ChangeState(PlayerAnimationTree.AnimationState.Airborne);
+                    playerAnimationTree.ChangeLocomotionState(PlayerAnimationTree.LocomotionAnimationState.Airborne);
                 }
                 break;
             case PlayerState.Tumble:
-                if (playerAnimationTree.CurrentState != PlayerAnimationTree.AnimationState.Airborne)
+                // Consider adding a specific LocomotionAnimationState.Tumble if you have one
+                if (playerAnimationTree.CurrentLocomotionState != PlayerAnimationTree.LocomotionAnimationState.Airborne) 
                 {
-                    //TODO: Add animation state for 'Tumble' or some form of substitution
-                    //playerAnimationTree.ChangeState(PlayerAnimationTree.AnimationState.Tumble);
+                    playerAnimationTree.ChangeLocomotionState(PlayerAnimationTree.LocomotionAnimationState.Airborne); 
                 }
                 break;
             case PlayerState.WallStick:
-                if (playerAnimationTree.CurrentState != PlayerAnimationTree.AnimationState.WallSlide)
+                if (playerAnimationTree.CurrentLocomotionState != PlayerAnimationTree.LocomotionAnimationState.WallSlide)
                 {              
-                    playerAnimationTree.ChangeState(PlayerAnimationTree.AnimationState.WallSlide);
+                    playerAnimationTree.ChangeLocomotionState(PlayerAnimationTree.LocomotionAnimationState.WallSlide);
                 }
                 break;
             default:
@@ -143,7 +130,7 @@ public partial class Player : CharacterBody3D
         _currentActionState = ActionState.Attacking;
         _actionTimer = duration;
 
-        // Set IsMovementLocked based on the attack data
+        // Set IsMovementLocked based on the attack data (already correct from previous step)
         var currentAttack = _attackManager.GetCurrentAttack();
         if (currentAttack != null)
         {
@@ -151,30 +138,21 @@ public partial class Player : CharacterBody3D
         }
         else
         {
-            // Default to locked movement if attack data is not found
             _movementController.IsMovementLocked = true;
         }
 
         Velocity = Vector3.Zero;
         GetTree().CreateTimer(lockout).Timeout += OnAttackLockoutEnd;
 
-        //playerAnimationTree.ChangeState(PlayerAnimationTree.AnimationState.Attack);
-        // Optionally: disable movement input here
+        // Animation change is handled in OnAttack()
     }
 
     private void OnAttackLockoutEnd()
     {
-        // After lockout, allow canceling by movement/jump/dash
         if (_currentActionState == ActionState.Attacking)
         {
-            // Reset the movement lock flag
             _movementController.IsMovementLocked = false;
-
-            // Remove previous state transition logic as movement state machine is no longer "Locked"
-            // if (_stateBeforeLock == PlayerState.Falling || _stateBeforeLock == PlayerState.Jumping || _stateBeforeLock == PlayerState.Falling)
-            //     _movementController.ChangeState(PlayerState.Falling);
-            // else
-            //     _movementController.ChangeState(PlayerState.Normal);
+            // REMOVED: Old state transition logic. Locomotion state machine handles transitions naturally.
         }
     }
 
@@ -182,8 +160,8 @@ public partial class Player : CharacterBody3D
     private void EndActionState()
     {
         _currentActionState = ActionState.None;
-        // Optionally: re-enable movement input here
         _movementController.IsMovementLocked = false;
+        playerAnimationTree.ChangeActionState(PlayerAnimationTree.ActionAnimationState.None); // Reset upper body animation to idle
     }
 
     private void OnAttack()
@@ -198,7 +176,7 @@ public partial class Player : CharacterBody3D
         GD.Print($"OnAttack called. Current attack ID: {attackId}");
         if (_currentActionState == ActionState.None)
         {
-            _attackManager.SetAttackById(attackId); // Make sure this is called before GetCurrentAttack
+            _attackManager.SetAttackById(attackId);
             var attack = _attackManager.GetCurrentAttack();
             if (attack == null)
                 return;
@@ -206,8 +184,17 @@ public partial class Player : CharacterBody3D
             _attackManager.PerformAttack();
             StartAttack(attack.Duration, attack.Lockout);
 
-            playerAnimationTree.ChangeState((PlayerAnimationTree.AnimationState)Enum.Parse(
-                typeof(PlayerAnimationTree.AnimationState), attack.Animation));
+            // Use ChangeActionState for attack animations
+            PlayerAnimationTree.ActionAnimationState actionAnimState;
+            if (Enum.TryParse(attack.Animation, out actionAnimState))
+            {
+                playerAnimationTree.ChangeActionState(actionAnimState);
+            }
+            else
+            {
+                GD.PushWarning($"Could not find ActionAnimationState for: {attack.Animation}. Falling back to Attack animation.");
+                playerAnimationTree.ChangeActionState(PlayerAnimationTree.ActionAnimationState.Attack); // Fallback
+            }
         }
     }
 
@@ -241,7 +228,8 @@ public partial class Player : CharacterBody3D
         if (_currentActionState == ActionState.Attacking)
         {
             _attackManager.CancelAttack(0.08f); // e.g., 0.08 seconds linger
-            playerAnimationTree.ChangeState(PlayerAnimationTree.AnimationState.Normal); // or Idle
+            playerAnimationTree.ChangeLocomotionState(PlayerAnimationTree.LocomotionAnimationState.Idle); // Reset locomotion
+            playerAnimationTree.ChangeActionState(PlayerAnimationTree.ActionAnimationState.None); // Reset action
             EndActionState();
         }
     }
@@ -249,6 +237,7 @@ public partial class Player : CharacterBody3D
     public bool CanMove()
     {
         // Only allow movement if not attacking or casting (or add other states as needed)
+        // Note: The IsMovementLocked flag in MovementController is the primary control for movement input.
         return _currentActionState == ActionState.None;
     }
 
@@ -273,7 +262,23 @@ public partial class Player : CharacterBody3D
             
             // If it's a projectile attack, your AttackManager will know what to do!
             // If it's a melee sweep, you can also trigger the animation/hitbox here:
-            _attackManager.ActivateHitbox(); 
+            // _attackManager.ActivateHitbox(); // ActivateHitbox is typically called by an animation event
+            
+            // Trigger action animation
+            var attack = _attackManager.GetCurrentAttack();
+            if (attack != null)
+            {
+                PlayerAnimationTree.ActionAnimationState actionAnimState;
+                if (Enum.TryParse(attack.Animation, out actionAnimState))
+                {
+                    playerAnimationTree.ChangeActionState(actionAnimState);
+                }
+                else
+                {
+                    GD.PushWarning($"Could not find ActionAnimationState for: {attack.Animation}. Falling back to Attack animation.");
+                    playerAnimationTree.ChangeActionState(PlayerAnimationTree.ActionAnimationState.Attack); // Fallback
+                }
+            }
         }
     }
 
@@ -284,8 +289,23 @@ public partial class Player : CharacterBody3D
             GD.Print($"Player: Triggering card attack by ID: {attackId}");
             _attackManager.SetAttackById(attackId);
             _attackManager.PerformAttack();
-            _attackManager.ActivateHitbox();
+            // _attackManager.ActivateHitbox(); // ActivateHitbox is typically called by an animation event
+
+            // Trigger action animation
+            var attack = _attackManager.GetCurrentAttack();
+            if (attack != null)
+            {
+                PlayerAnimationTree.ActionAnimationState actionAnimState;
+                if (Enum.TryParse(attack.Animation, out actionAnimState))
+                {
+                    playerAnimationTree.ChangeActionState(actionAnimState);
+                }
+                else
+                {
+                    GD.PushWarning($"Could not find ActionAnimationState for: {attack.Animation}. Falling back to Attack animation.");
+                    playerAnimationTree.ChangeActionState(PlayerAnimationTree.ActionAnimationState.Attack); // Fallback
+                }
+            }
         }
     }
-
 }
