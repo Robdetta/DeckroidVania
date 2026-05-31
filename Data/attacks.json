@@ -39,7 +39,7 @@
     "Lockout": 0.0,
     "Hitbox": "Player/Visual/RootNode/Hitbox",
     "HitboxSize": [1, 2, 1],
-    "HitboxOffset": [1, 2, 1],
+    "HitboxOffset": [2, 2, 1],
     "HitBoxLifetime": 0.2,
     "KnockbackForce": 20,
     "KnockbackDuration": 0.1

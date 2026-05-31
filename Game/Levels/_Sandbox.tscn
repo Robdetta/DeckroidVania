@@ -25,7 +25,7 @@ sky = SubResource("Sky_s1rwx")
 sky_custom_fov = 38.8
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vs8ge"]
-size = Vector3(3.96472, 3.38672, 1.2041)
+size = Vector3(3.96472, 0.588715, 1.2041)
 
 [node name="Sandbox" type="Node3D"]
 script = ExtResource("1_t0755")
@@ -83,3 +83,14 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.1414, 3.10423, 0)
 
 [node name="Marker3" type="Marker3D" parent="EnemyMarkers"]
 transform = Transform3D(-0.451158, 0, -0.892445, 0, 1, 0, 0.892445, 0, -0.451158, -21.8099, 0.0926089, -0.176047)
+
+[node name="CSGBox3D7" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 12.0397, 0, 0, 0, 1, 23.9526, 3.8966, -0.184229)
+use_collision = true
+size = Vector3(3.5, 0.576293, 1)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="CSGBox3D7" groups=["WallStick"]]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CSGBox3D7/StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.103737, 0.00414628, 0.0718708)
+shape = SubResource("BoxShape3D_vs8ge")

@@ -48,12 +48,12 @@ public partial class Card : Control
         //    _cardNameLabel.Text = CardNameText;
         if (_cardNameLabel != null)
         {
-            //GD.Print("CardNameLabel is valid");
+            GD.Print("CardNameLabel is valid");
             _cardNameLabel.Text = CardNameText;
         }
         else
         {
-            GD.PrintErr("CardNameLabel is null in UpdateCard");
+           // GD.PrintErr("CardNameLabel is null in UpdateCard");
         }
 
         if(_cardTypeLabel != null)
@@ -66,7 +66,7 @@ public partial class Card : Control
         }
         else
         {
-            GD.PrintErr("ManaCostLabel is null in UpdateCard");
+            //GD.PrintErr("ManaCostLabel is null in UpdateCard");
         }
         // if(_manaCostLabel != null)
         //     _manaCostLabel.Text = ManaCostValue.ToString();
