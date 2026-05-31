@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://4ctmq18hrcap"]
+[gd_scene format=3 uid="uid://4ctmq18hrcap"]
 
 [ext_resource type="Script" uid="uid://bsj7xh3cudv2g" path="res://Game/Systems/GameController.cs" id="1_efta3"]
 [ext_resource type="PackedScene" uid="uid://bp0s2oy13ebug" path="res://Game/Levels/_Sandbox.tscn" id="2_480f2"]
@@ -13,28 +13,28 @@
 [ext_resource type="PackedScene" uid="uid://bo7isj7ncgdpa" path="res://Scenes/Menu/Pause/PauseMenu.tscn" id="8_jpl12"]
 [ext_resource type="PackedScene" uid="uid://4lwc62aqullf" path="res://Scenes/GamePlayHUD.tscn" id="8_n31oc"]
 
-[node name="GameController" type="Node" node_paths=PackedStringArray("World3D", "World2D", "UIManager")]
+[node name="GameController" type="Node" unique_id=1252128738 node_paths=PackedStringArray("World3D", "World2D", "UIManager")]
 script = ExtResource("1_efta3")
 World3D = NodePath("World3D")
 World2D = NodePath("World2D")
-Levels = Array[PackedScene]([ExtResource("2_uhsoj"), ExtResource("2_480f2")])
+Levels = Array[PackedScene]([ExtResource("2_480f2"), ExtResource("2_uhsoj")])
 UIManager = NodePath("GUI")
 
-[node name="World3D" type="Node3D" parent="."]
+[node name="World3D" type="Node3D" parent="." unique_id=434600399]
 
-[node name="World2D" type="Node3D" parent="." node_paths=PackedStringArray("MarkerManager", "EnemySpawner")]
+[node name="World2D" type="Node3D" parent="." unique_id=2039703022 node_paths=PackedStringArray("MarkerManager", "EnemySpawner")]
 script = ExtResource("4_47wjs")
 PlayerScene = ExtResource("5_d6roa")
 MarkerManager = NodePath("MarkerManager")
 EnemySpawner = NodePath("EnemySpawner")
 
-[node name="MarkerManager" type="Node" parent="World2D"]
+[node name="MarkerManager" type="Node" parent="World2D" unique_id=1647073333]
 script = ExtResource("6_yl6pg")
 
-[node name="EnemySpawner" type="Node" parent="World2D"]
+[node name="EnemySpawner" type="Node" parent="World2D" unique_id=1345554412]
 script = ExtResource("7_73xiu")
 
-[node name="GUI" type="Control" parent="."]
+[node name="GUI" type="Control" parent="." unique_id=2030834195]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -45,7 +45,7 @@ PauseMenuScene = ExtResource("8_jpl12")
 CardHandScene = ExtResource("6_60app")
 GameplayHUDScene = ExtResource("8_n31oc")
 
-[node name="Button" type="Button" parent="GUI"]
+[node name="Button" type="Button" parent="GUI" unique_id=575889546]
 layout_mode = 0
 offset_left = 65.0
 offset_top = 67.0

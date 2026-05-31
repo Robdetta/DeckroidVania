@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://bp0s2oy13ebug"]
+[gd_scene format=3 uid="uid://bp0s2oy13ebug"]
 
 [ext_resource type="PackedScene" uid="uid://cvrm8hwlkmga" path="res://Assets/Assets/TEST/DamageZone.tscn" id="1_q6wpc"]
 [ext_resource type="Script" uid="uid://jok3aclr8k6d" path="res://Game/Levels/_Sandbox.cs" id="1_t0755"]
@@ -27,70 +27,70 @@ sky_custom_fov = 38.8
 [sub_resource type="BoxShape3D" id="BoxShape3D_vs8ge"]
 size = Vector3(3.96472, 0.588715, 1.2041)
 
-[node name="Sandbox" type="Node3D"]
+[node name="Sandbox" type="Node3D" unique_id=657744543]
 script = ExtResource("1_t0755")
 
-[node name="PlayerSpawn" type="Marker3D" parent="."]
+[node name="PlayerSpawn" type="Marker3D" parent="." unique_id=1430479364]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 0)
 
-[node name="CSGBox3D" type="CSGBox3D" parent="."]
+[node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=1431690201]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.125, 0)
 use_collision = true
 size = Vector3(100, 0.25, 1)
 
-[node name="CSGBox3D3" type="CSGBox3D" parent="."]
+[node name="CSGBox3D3" type="CSGBox3D" parent="." unique_id=1310919838]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.3063, 5.0174, 0)
 size = Vector3(5, 0.25, 1)
 
-[node name="StaticBody3D" type="StaticBody3D" parent="CSGBox3D3" groups=["CanDropThrough"]]
+[node name="StaticBody3D" type="StaticBody3D" parent="CSGBox3D3" unique_id=161030245 groups=["CanDropThrough"]]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="CSGBox3D3/StaticBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CSGBox3D3/StaticBody3D" unique_id=1120329548]
 shape = SubResource("BoxShape3D_hieaj")
 
-[node name="CSGBox3D5" type="CSGBox3D" parent="."]
+[node name="CSGBox3D5" type="CSGBox3D" parent="." unique_id=242993685]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.3063, 3.0174, 0)
 size = Vector3(5, 0.25, 1)
 
-[node name="StaticBody3D" type="StaticBody3D" parent="CSGBox3D5" groups=["CanDropThrough"]]
+[node name="StaticBody3D" type="StaticBody3D" parent="CSGBox3D5" unique_id=404141732 groups=["CanDropThrough"]]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="CSGBox3D5/StaticBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CSGBox3D5/StaticBody3D" unique_id=648514990]
 visible = false
 shape = SubResource("BoxShape3D_0punv")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=714215876]
 environment = SubResource("Environment_mkqm4")
 
-[node name="CSGBox3D4" type="CSGBox3D" parent="."]
+[node name="CSGBox3D4" type="CSGBox3D" parent="." unique_id=1821522117]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.864, 2, 0)
 use_collision = true
 size = Vector3(3.5, 4, 1)
 
-[node name="CSGBox3D6" type="CSGBox3D" parent="."]
+[node name="CSGBox3D6" type="CSGBox3D" parent="." unique_id=1064892975]
 transform = Transform3D(1, 0, 0, 0, 3.46982, 0, 0, 0, 1, -33.6106, 5.89355, 0.13488)
 use_collision = true
 size = Vector3(3.5, 3.43286, 1)
 
-[node name="StaticBody3D" type="StaticBody3D" parent="CSGBox3D6" groups=["WallStick"]]
+[node name="StaticBody3D" type="StaticBody3D" parent="CSGBox3D6" unique_id=1527919279 groups=["WallStick"]]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="CSGBox3D6/StaticBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CSGBox3D6/StaticBody3D" unique_id=1816972635]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.103737, 0.0206412, 0.0718708)
 shape = SubResource("BoxShape3D_vs8ge")
 
-[node name="DamageZone" parent="." instance=ExtResource("1_q6wpc")]
+[node name="DamageZone" parent="." unique_id=2068184003 instance=ExtResource("1_q6wpc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.1414, 3.10423, 0)
 
-[node name="EnemyMarkers" type="Node" parent="."]
+[node name="EnemyMarkers" type="Node" parent="." unique_id=2131267555]
 
-[node name="Marker3" type="Marker3D" parent="EnemyMarkers"]
+[node name="Marker3" type="Marker3D" parent="EnemyMarkers" unique_id=1606963141]
 transform = Transform3D(-0.451158, 0, -0.892445, 0, 1, 0, 0.892445, 0, -0.451158, -21.8099, 0.0926089, -0.176047)
 
-[node name="CSGBox3D7" type="CSGBox3D" parent="."]
+[node name="CSGBox3D7" type="CSGBox3D" parent="." unique_id=1885746119]
 transform = Transform3D(1, 0, 0, 0, 12.0397, 0, 0, 0, 1, 23.9526, 3.8966, -0.184229)
 use_collision = true
 size = Vector3(3.5, 0.576293, 1)
 
-[node name="StaticBody3D" type="StaticBody3D" parent="CSGBox3D7" groups=["WallStick"]]
+[node name="StaticBody3D" type="StaticBody3D" parent="CSGBox3D7" unique_id=1346823885 groups=["WallStick"]]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="CSGBox3D7/StaticBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CSGBox3D7/StaticBody3D" unique_id=1643637883]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.103737, 0.00414628, 0.0718708)
 shape = SubResource("BoxShape3D_vs8ge")
