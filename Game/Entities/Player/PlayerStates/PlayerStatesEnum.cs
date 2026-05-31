@@ -9,7 +9,6 @@
         WallStick,
         WallJump,
         Tumble,
-        Locked,
 
     }
 }

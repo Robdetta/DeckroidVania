@@ -26,6 +26,7 @@ public partial class MovementController : Node
 
 	[Export, ExportGroup("Player Environment")]
 	public float _gravityStrength;
+	public bool IsMovementLocked { get; set; } = false; 
 
 
 	//This can be moved back into Dashingstate.cs, left it here for the exports to Godot
@@ -106,7 +107,6 @@ public partial class MovementController : Node
 			{ PlayerState.Tumble, new TumbleState(this) },
 			{ PlayerState.WallStick, new WallStickState(this) },
 			{ PlayerState.WallJump, new WallJumpState(this) },
-			{ PlayerState.Locked, new LockedState(this) }
 		};
 
 		// Start in Normal

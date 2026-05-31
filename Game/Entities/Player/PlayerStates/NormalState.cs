@@ -33,6 +33,8 @@ public class NormalState : IPlayerState
 
     public void HandleInput(double delta)
     {
+        if (_controller.IsMovementLocked) return; 
+
         // If not on floor, switch to falling
         if (!_controller.IsOnFloor())
         {
@@ -76,6 +78,7 @@ public class NormalState : IPlayerState
         // e.g. controller.ApplyMovementAndGravity(delta);
         // or your own version. 
         // Possibly do:
+        if (_controller.IsMovementLocked) return; 
 
         _controller.ApplyFacingRotation(delta);
         _controller.ApplyHorizontalMovement(delta);

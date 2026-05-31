@@ -25,6 +25,9 @@ public class AttackData
     public float KnockbackForce { get; set; } 
     public float KnockbackDuration { get; set; }
 
+    // New property for refactoring
+    public bool AllowMovement { get; set; } = false; // Default to false if not specified in JSON
+
     // Helper properties to get Vector3
     public Vector3 HitboxSizeVec => HitboxSize != null && HitboxSize.Length == 3
         ? new Vector3(HitboxSize[0], HitboxSize[1], HitboxSize[2])

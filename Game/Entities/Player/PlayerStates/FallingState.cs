@@ -26,6 +26,7 @@ public class FallingState : IPlayerState
 
     public void HandleInput(double delta)
     {   
+        if (_controller.IsMovementLocked) return;
 
         // If we land on floor => Normal
         if (_controller.IsOnFloor())
@@ -69,7 +70,8 @@ public class FallingState : IPlayerState
     }
 
     public void UpdateState(double delta)
-    {
+    {   
+        if (_controller.IsMovementLocked) return;
         // controller.ApplyFacingRotation(delta);
         // // We can apply normal gravity or call a helper like:
         // // Then do normal air input horizontally:

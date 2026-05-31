@@ -62,6 +62,7 @@ public class WallStickState : IPlayerState
 
     public void HandleInput(double delta)
     {
+        if (_controller.IsMovementLocked) return;
         if (_controller.IsOnFloor())
         {
             _controller.ChangeState(PlayerState.Normal);
@@ -114,6 +115,7 @@ public class WallStickState : IPlayerState
 
     public void UpdateState(double delta)
     {
+        if (_controller.IsMovementLocked) return;
         if (_controller.IsPressingIntoWall())
         {
             _controller.ClampWallSlideVelocity();

@@ -67,6 +67,7 @@ public class JumpingState : IPlayerState
 
     public void HandleInput(double delta)
     {
+        if (_controller.IsMovementLocked) return;
         // Land check
         if (_controller.IsOnFloor())
         {
@@ -110,6 +111,7 @@ public class JumpingState : IPlayerState
     }
     public void UpdateState(double delta)
     {
+        if (_controller.IsMovementLocked) return;
         if (_controller._isDashJumping)
         {
             _controller._dashJumpTimer -= (float)delta;

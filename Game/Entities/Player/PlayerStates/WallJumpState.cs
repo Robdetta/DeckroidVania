@@ -68,11 +68,11 @@ namespace DeckroidVania2.Game.Player.PlayerStates
 
         public void HandleInput(double delta)
         {
-
+            if (_controller.IsMovementLocked) return;
         }
         public void UpdateState(double delta)
         {
-            
+            if (_controller.IsMovementLocked) return;
         }
     }
 }

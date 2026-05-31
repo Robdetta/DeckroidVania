@@ -32,6 +32,7 @@ namespace DeckroidVania.Game.Entities.Enemies.States
 
         public void HandleInput(double delta)
         {
+            
             // No input during falling
         }
 

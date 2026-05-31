@@ -140,10 +140,20 @@ public partial class Player : CharacterBody3D
 
     public void StartAttack(float duration, float lockout = 0.5f)
     {
-        _stateBeforeLock = _movementController.CurrentState;
         _currentActionState = ActionState.Attacking;
         _actionTimer = duration;
-        _movementController.ChangeState(PlayerState.Locked);
+
+        // Set IsMovementLocked based on the attack data
+        var currentAttack = _attackManager.GetCurrentAttack();
+        if (currentAttack != null)
+        {
+            _movementController.IsMovementLocked = !currentAttack.AllowMovement;
+        }
+        else
+        {
+            // Default to locked movement if attack data is not found
+            _movementController.IsMovementLocked = true;
+        }
 
         Velocity = Vector3.Zero;
         GetTree().CreateTimer(lockout).Timeout += OnAttackLockoutEnd;
@@ -157,18 +167,23 @@ public partial class Player : CharacterBody3D
         // After lockout, allow canceling by movement/jump/dash
         if (_currentActionState == ActionState.Attacking)
         {
-            // Optionally: transition to Attacking state or back to previous state
-            if (_stateBeforeLock == PlayerState.Falling || _stateBeforeLock == PlayerState.Jumping || _stateBeforeLock == PlayerState.Falling)
-                _movementController.ChangeState(PlayerState.Falling);
-            else
-                _movementController.ChangeState(PlayerState.Normal);
+            // Reset the movement lock flag
+            _movementController.IsMovementLocked = false;
+
+            // Remove previous state transition logic as movement state machine is no longer "Locked"
+            // if (_stateBeforeLock == PlayerState.Falling || _stateBeforeLock == PlayerState.Jumping || _stateBeforeLock == PlayerState.Falling)
+            //     _movementController.ChangeState(PlayerState.Falling);
+            // else
+            //     _movementController.ChangeState(PlayerState.Normal);
         }
     }
+
 
     private void EndActionState()
     {
         _currentActionState = ActionState.None;
         // Optionally: re-enable movement input here
+        _movementController.IsMovementLocked = false;
     }
 
     private void OnAttack()
@@ -183,7 +198,7 @@ public partial class Player : CharacterBody3D
         GD.Print($"OnAttack called. Current attack ID: {attackId}");
         if (_currentActionState == ActionState.None)
         {
-            _attackManager.SetAttackById(attackId);
+            _attackManager.SetAttackById(attackId); // Make sure this is called before GetCurrentAttack
             var attack = _attackManager.GetCurrentAttack();
             if (attack == null)
                 return;

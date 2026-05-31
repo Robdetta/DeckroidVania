@@ -47,6 +47,7 @@ public class DashingState : IPlayerState
 
     public void HandleInput(double delta)
     {
+        if (_controller.IsMovementLocked) return; 
         _dashTimer -= (float)delta;
 
         // If jump is pressed, transfer momentum correctly
