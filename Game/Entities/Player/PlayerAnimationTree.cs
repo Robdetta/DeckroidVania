@@ -95,17 +95,26 @@ public partial class PlayerAnimationTree : AnimationTree
         if (_currentActionState == newState) return;
 
         _currentActionState = newState;
-        GD.Print($"Changing Action State to: {newState}");
+        // GD.Print($"Changing Action State to: {newState}"); // Keep for debugging if needed
 
         switch (newState)
         {
             case ActionAnimationState.None:
-                _actionPlayback.Travel("Idle"); // Assuming an "Idle" state in the Actions SM
+                // When action ends, ensure flags are reset for transitions
+                Set("parameters/Actions/action_is_attacking", false);
+                Set("parameters/Actions/action_is_casting_projectile", false);
+                _actionPlayback.Travel("Idle"); // Back to upper body idle
                 break;
             case ActionAnimationState.Attack:
+                // Set flag to true to trigger attack animation transition
+                Set("parameters/Actions/action_is_attacking", true);
+                Set("parameters/Actions/action_is_casting_projectile", false); // Ensure other actions are off
                 _actionPlayback.Travel("Attack");
                 break;
             case ActionAnimationState.Projectile:
+                // Set flag to true to trigger projectile animation transition
+                Set("parameters/Actions/action_is_attacking", false); // Ensure other actions are off
+                Set("parameters/Actions/action_is_casting_projectile", true);
                 _actionPlayback.Travel("Projectile");
                 break;
             default:
@@ -115,11 +124,11 @@ public partial class PlayerAnimationTree : AnimationTree
     }
 
 	public void SetGroundBlend(float blendValue){
-		Set("parameters/StateMachine/GroundMovement/blend_position", blendValue);
+		Set("parameters/Locomotion/GroundMovement/blend_position", blendValue);
 	}
 
 	public void SetAirborneBlend(float blendValue){
-		Set("parameters/StateMachine/AirMovement/blend_position", blendValue);
+		Set("parameters/Airborne/AirMovement/blend_position", blendValue);
 	}
 
 	public void SetDashBlend(float blendValue){
@@ -127,7 +136,7 @@ public partial class PlayerAnimationTree : AnimationTree
 	}
 
 	public void SetAttackBlend(float blendValue){
-		Set("parameters/StateMachine/Attack/blend_position", blendValue);
+		Set("parameters/Actions/Attack/blend_position", blendValue);
 	}
 
 }
