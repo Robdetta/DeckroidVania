@@ -26,11 +26,11 @@ public partial class Player : CharacterBody3D
     private WeaponManager _weaponManager;
     private ActionState _currentActionState = ActionState.None;
     private float _actionTimer = 0f;
-    // REMOVED: private PlayerState _stateBeforeLock; // No longer needed
     public bool IsFacingRight() => _movementController._faceRight;
 
     public override void _Ready()
     {
+        GD.Print("[Player] Player _Ready called."); // <-- ADD/VERIFY THIS
         _movementController.Initialize(this);
         _weaponManager = new WeaponManager(this);
         _weaponManager.EquipWeaponById(1);  //testing github syncing
@@ -41,22 +41,20 @@ public partial class Player : CharacterBody3D
         if (InputManager.Instance != null)
         {
             InputManager.Instance.Attack += OnAttack;
-            //InputManager.Instance.ProjectileAttack += OnProjectileAttack;
+            GD.Print("[Player] InputManager.Attack subscribed."); // <-- ADD/VERIFY THIS
         }
     }
 
     public override void _Process(double delta)
     {
-        // Called every frame. Delta is time since the last frame.
-        // Update game logic here.
-
         // Get the current movement state
         var currentState = _movementController.CurrentState;
 
-        // REMOVED: Old attack-canceling logic based on movement state.
-        // This is now handled by MovementController.IsMovementLocked and AttackData.AllowMovement.
+        // --- Update AnimationTree parameters for Locomotion Transitions ---
+        // These boolean values will be used in the AnimationTree's transition conditions (expressions).
+        // Add parameter setters for other locomotion states (e.g., is_dead) here.
 
-        // Handle action state first (upper body animation control)
+        // Handle action state timer (upper body animation control)
         if (_currentActionState != ActionState.None)
         {
             _actionTimer -= (float)delta;
@@ -64,15 +62,18 @@ public partial class Player : CharacterBody3D
             {
                 EndActionState();
             }
-            // REMOVED: 'return;' statement. Locomotion should still update if movement is allowed.
         }
 
-        // Always update locomotion animation blends, even if an action is happening
-        playerAnimationTree.SetGroundBlend(Mathf.Abs(Velocity.X));
-        playerAnimationTree.SetAirborneBlend(Velocity.Y);
+        // --- Always update locomotion animation blends ---
+        // Pass absolute horizontal velocity for blending idle/run in GroundMovement blend space.
+        playerAnimationTree.SetGroundBlend(Mathf.Abs(_movementController._velocity.X)); 
+        // Pass raw Y velocity for blending jump up/fall down in Airborne blend space.
+        playerAnimationTree.SetAirborneBlend(_movementController._velocity.Y);
 
 
-        // Control locomotion animations based on movement controller state
+        // --- Control Locomotion Animation States ---
+        // These `ChangeLocomotionState` calls primarily manage which high-level state (GroundMovement, Airborne, Dash, etc.)
+        // the locomotion state machine is in. Blending within these states is handled by the blend parameters.
         switch (currentState)
         {
             case PlayerState.Dashing:
@@ -83,25 +84,24 @@ public partial class Player : CharacterBody3D
                 break;
 
             case PlayerState.Jumping:
+            case PlayerState.Falling: // Both map to Airborne locomotion animation state
                 if (playerAnimationTree.CurrentLocomotionState != PlayerAnimationTree.LocomotionAnimationState.Airborne)
                 {
                     playerAnimationTree.ChangeLocomotionState(PlayerAnimationTree.LocomotionAnimationState.Airborne);
                 }
                 break;
             case PlayerState.Normal:
-                if (playerAnimationTree.CurrentLocomotionState != PlayerAnimationTree.LocomotionAnimationState.Idle) 
+                // Only travel to GroundMovement if not already in an idle/run state
+                // This prevents re-traveling if the blend position is simply changing.
+                if (playerAnimationTree.CurrentLocomotionState != PlayerAnimationTree.LocomotionAnimationState.Idle &&
+                    playerAnimationTree.CurrentLocomotionState != PlayerAnimationTree.LocomotionAnimationState.Run)
                 {
-                    playerAnimationTree.ChangeLocomotionState(PlayerAnimationTree.LocomotionAnimationState.Idle); 
-                }
-                break;
-            case PlayerState.Falling:
-                if (playerAnimationTree.CurrentLocomotionState != PlayerAnimationTree.LocomotionAnimationState.Airborne)
-                {
-                    playerAnimationTree.ChangeLocomotionState(PlayerAnimationTree.LocomotionAnimationState.Airborne);
+                     playerAnimationTree.ChangeLocomotionState(PlayerAnimationTree.LocomotionAnimationState.Idle); 
                 }
                 break;
             case PlayerState.Tumble:
-                // Consider adding a specific LocomotionAnimationState.Tumble if you have one
+                // If you have a specific Tumble animation state, use it here.
+                // Otherwise, Airborne is a reasonable fallback.
                 if (playerAnimationTree.CurrentLocomotionState != PlayerAnimationTree.LocomotionAnimationState.Airborne) 
                 {
                     playerAnimationTree.ChangeLocomotionState(PlayerAnimationTree.LocomotionAnimationState.Airborne); 
@@ -114,7 +114,7 @@ public partial class Player : CharacterBody3D
                 }
                 break;
             default:
-                // Handle other movement states
+                GD.PushWarning($"Unhandled PlayerState for Locomotion Animation: {currentState}");
                 break;
         }
 
@@ -127,82 +127,97 @@ public partial class Player : CharacterBody3D
 
     public void StartAttack(float duration, float lockout = 0.5f)
     {
+        GD.Print($"[Player] StartAttack called. Duration: {duration}, Lockout: {lockout}"); // <-- ADD/VERIFY THIS
         _currentActionState = ActionState.Attacking;
         _actionTimer = duration;
 
-        // Set IsMovementLocked based on the attack data (already correct from previous step)
         var currentAttack = _attackManager.GetCurrentAttack();
         if (currentAttack != null)
         {
             _movementController.IsMovementLocked = !currentAttack.AllowMovement;
+            GD.Print($"[Player] Attack '{currentAttack.Name}'. AllowMovement: {currentAttack.AllowMovement}. IsMovementLocked set to: {_movementController.IsMovementLocked}"); // <-- ADD/VERIFY THIS
         }
         else
         {
             _movementController.IsMovementLocked = true;
+            GD.Print("[Player] Attack data not found, defaulting to IsMovementLocked = true."); // <-- ADD/VERIFY THIS
         }
 
         Velocity = Vector3.Zero;
         GetTree().CreateTimer(lockout).Timeout += OnAttackLockoutEnd;
-
-        // Animation change is handled in OnAttack()
     }
+
 
     private void OnAttackLockoutEnd()
     {
+        GD.Print("[Player] OnAttackLockoutEnd called."); // <-- ADD/VERIFY THIS
         if (_currentActionState == ActionState.Attacking)
         {
             _movementController.IsMovementLocked = false;
-            // REMOVED: Old state transition logic. Locomotion state machine handles transitions naturally.
+            GD.Print("[Player] OnAttackLockoutEnd: IsMovementLocked set to false."); // <-- ADD/VERIFY THIS
         }
     }
 
-
     private void EndActionState()
     {
+        GD.Print("[Player] EndActionState called."); // <-- ADD/VERIFY THIS
         _currentActionState = ActionState.None;
         _movementController.IsMovementLocked = false;
         playerAnimationTree.ChangeActionState(PlayerAnimationTree.ActionAnimationState.None); // Reset upper body animation to idle
+        GD.Print("[Player] EndActionState: IsMovementLocked=false, ActionState=None, ChangeActionState(None) called."); // <-- ADD/VERIFY THIS
     }
 
-    private void OnAttack()
+  private void OnAttack()
     {
-        GD.Print("OnAttack called");
+        GD.Print("[Player] OnAttack event triggered. Checking if allowed to attack."); // <-- ADD/VERIFY THIS
         var weapon = _weaponManager.GetCurrentWeapon();
         if (weapon == null || weapon.AttackIds.Length == 0)
+        {
+            GD.PrintErr("[Player] OnAttack: No weapon or attacks found. Returning."); // <-- ADD/VERIFY THIS
             return;
+        }
 
         int attackId = weapon.AttackIds[0];
+        GD.Print($"[Player] OnAttack: Attack ID: {attackId}. Current action state: {_currentActionState}."); // <-- ADD/VERIFY THIS
 
-        GD.Print($"OnAttack called. Current attack ID: {attackId}");
         if (_currentActionState == ActionState.None)
         {
             _attackManager.SetAttackById(attackId);
             var attack = _attackManager.GetCurrentAttack();
             if (attack == null)
+            {
+                GD.PrintErr("[Player] OnAttack: Attack data not found for ID " + attackId + ". Returning."); // <-- ADD/VERIFY THIS
                 return;
+            }
 
+            GD.Print($"[Player] OnAttack: Starting attack: {attack.Name}, Animation: '{attack.Animation}'"); // <-- ADD/VERIFY THIS
             _attackManager.PerformAttack();
             StartAttack(attack.Duration, attack.Lockout);
 
-            // Use ChangeActionState for attack animations
             PlayerAnimationTree.ActionAnimationState actionAnimState;
             if (Enum.TryParse(attack.Animation, out actionAnimState))
             {
                 playerAnimationTree.ChangeActionState(actionAnimState);
+                GD.Print($"[Player] OnAttack: Parsed animation '{attack.Animation}' to {actionAnimState}. Calling ChangeActionState."); // <-- ADD/VERIFY THIS
             }
             else
             {
-                GD.PushWarning($"Could not find ActionAnimationState for: {attack.Animation}. Falling back to Attack animation.");
-                playerAnimationTree.ChangeActionState(PlayerAnimationTree.ActionAnimationState.Attack); // Fallback
+                GD.PushWarning($"[Player] OnAttack: Could not parse animation '{attack.Animation}' to ActionAnimationState. Falling back to Attack animation."); // <-- ADD/VERIFY THIS
+                playerAnimationTree.ChangeActionState(PlayerAnimationTree.ActionAnimationState.Attack);
             }
+        }
+        else
+        {
+            GD.Print($"[Player] OnAttack: Player is already in action state '{_currentActionState}'. Cannot start new attack."); // <-- ADD/VERIFY THIS
         }
     }
 
     public void SpawnAttackHitbox()
     {
-        GD.Print("SpawnAttackHitbox called from animation");
+        GD.Print("SpawnAttackHitbox called from animation"); // <-- ADD/VERIFY THIS
         _attackManager.ActivateHitbox();
     }
+
 
     public void SpawnAttackProjectile()
     {
@@ -227,7 +242,7 @@ public partial class Player : CharacterBody3D
     {
         if (_currentActionState == ActionState.Attacking)
         {
-            _attackManager.CancelAttack(0.08f); // e.g., 0.08 seconds linger
+            _attackManager.CancelAttack(0.08f);
             playerAnimationTree.ChangeLocomotionState(PlayerAnimationTree.LocomotionAnimationState.Idle); // Reset locomotion
             playerAnimationTree.ChangeActionState(PlayerAnimationTree.ActionAnimationState.None); // Reset action
             EndActionState();
@@ -236,8 +251,6 @@ public partial class Player : CharacterBody3D
 
     public bool CanMove()
     {
-        // Only allow movement if not attacking or casting (or add other states as needed)
-        // Note: The IsMovementLocked flag in MovementController is the primary control for movement input.
         return _currentActionState == ActionState.None;
     }
 
@@ -260,11 +273,6 @@ public partial class Player : CharacterBody3D
             _attackManager.SetAttackByName(attackName);
             _attackManager.PerformAttack();
             
-            // If it's a projectile attack, your AttackManager will know what to do!
-            // If it's a melee sweep, you can also trigger the animation/hitbox here:
-            // _attackManager.ActivateHitbox(); // ActivateHitbox is typically called by an animation event
-            
-            // Trigger action animation
             var attack = _attackManager.GetCurrentAttack();
             if (attack != null)
             {
@@ -289,9 +297,7 @@ public partial class Player : CharacterBody3D
             GD.Print($"Player: Triggering card attack by ID: {attackId}");
             _attackManager.SetAttackById(attackId);
             _attackManager.PerformAttack();
-            // _attackManager.ActivateHitbox(); // ActivateHitbox is typically called by an animation event
 
-            // Trigger action animation
             var attack = _attackManager.GetCurrentAttack();
             if (attack != null)
             {

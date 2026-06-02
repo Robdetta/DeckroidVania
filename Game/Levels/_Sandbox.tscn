@@ -81,9 +81,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.1414, 3.10423, 0)
 
 [node name="EnemyMarkers" type="Node" parent="." unique_id=2131267555]
 
-[node name="Marker3" type="Marker3D" parent="EnemyMarkers" unique_id=1606963141]
-transform = Transform3D(-0.451158, 0, -0.892445, 0, 1, 0, 0.892445, 0, -0.451158, -21.8099, 0.0926089, -0.176047)
-
 [node name="CSGBox3D7" type="CSGBox3D" parent="." unique_id=1885746119]
 transform = Transform3D(1, 0, 0, 0, 12.0397, 0, 0, 0, 1, 23.9526, 3.8966, -0.184229)
 use_collision = true

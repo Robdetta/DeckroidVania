@@ -6,7 +6,7 @@
     "Range": 2.0,
     "Animation": "Attack",
     "AllowMovement": true,
-    "Duration": 1.0,
+    "Duration": 0.2,
     "Lockout": 0.0,
     "Hitbox": "Player/Visual/RootNode/Hitbox",
     "HitboxSize": [1, 1, 1],
