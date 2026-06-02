@@ -120,6 +120,12 @@ public partial class Player : CharacterBody3D
 
     }
 
+    public void TestAnimationEvent()
+    {
+        GD.Print("[Player] !!! TestAnimationEvent CALLED SUCCESFFULLY !!!");
+    }
+
+
     public override void _PhysicsProcess(double delta)
     {
         _movementController.HandleMovement(delta);
