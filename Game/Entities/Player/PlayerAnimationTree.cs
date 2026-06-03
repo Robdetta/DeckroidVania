@@ -10,7 +10,7 @@ public partial class PlayerAnimationTree : AnimationTree
 
     public enum ActionAnimationState
     {
-        None, Attack, Projectile
+        None, Attack, Projectile, JumpingAttack
     }
 
     private AnimationNodeStateMachinePlayback _locomotionPlayback;
@@ -79,7 +79,11 @@ public partial class PlayerAnimationTree : AnimationTree
             case ActionAnimationState.Projectile:
                 _actionPlayback.Travel("Projectile");
                 GD.Print($"[PlayerAnimationTree] Actions: Travel to 'Projectile'."); // <-- ADD/VERIFY THIS
-                break;
+                break;            
+            case ActionAnimationState.JumpingAttack: // NEW: Handle Jumping Attack
+                _actionPlayback.Travel("JumpingAttack");
+                GD.Print($"[PlayerAnimationTree] Actions: Travel to 'JumpingAttack'.");
+                break;        
         }
     }
 

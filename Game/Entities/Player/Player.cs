@@ -200,15 +200,28 @@ public partial class Player : CharacterBody3D
             _attackManager.PerformAttack();
             StartAttack(attack.Duration, attack.Lockout);
 
+            // Determine the correct animation based on player's locomotion state
+            string animationToPlay = attack.Animation;
+            if (_movementController.CurrentState == PlayerState.Jumping || _movementController.CurrentState == PlayerState.Falling)
+            {
+                // Only apply jumping attack animation override if it's a melee attack
+                // Projectile attacks might have their own specific airborne animation handled by 'Projectile' ActionAnimationState
+                if (string.IsNullOrEmpty(attack.ProjectileScene))
+                {
+                    animationToPlay = "JumpingAttack";
+                    GD.Print("[Player] OnAttack: Overriding animation to 'JumpingAttack' due to airborne state.");
+                }
+            }
+
             PlayerAnimationTree.ActionAnimationState actionAnimState;
-            if (Enum.TryParse(attack.Animation, out actionAnimState))
+            if (Enum.TryParse(animationToPlay, out actionAnimState))
             {
                 playerAnimationTree.ChangeActionState(actionAnimState);
-                GD.Print($"[Player] OnAttack: Parsed animation '{attack.Animation}' to {actionAnimState}. Calling ChangeActionState."); // <-- ADD/VERIFY THIS
+                GD.Print($"[Player] OnAttack: Parsed animation '{animationToPlay}' to {actionAnimState}. Calling ChangeActionState.");
             }
             else
             {
-                GD.PushWarning($"[Player] OnAttack: Could not parse animation '{attack.Animation}' to ActionAnimationState. Falling back to Attack animation."); // <-- ADD/VERIFY THIS
+                GD.PushWarning($"[Player] OnAttack: Could not parse animation '{animationToPlay}' to ActionAnimationState. Falling back to Attack animation.");
                 playerAnimationTree.ChangeActionState(PlayerAnimationTree.ActionAnimationState.Attack);
             }
         }
