@@ -26,6 +26,8 @@ public partial class Player : CharacterBody3D
     private WeaponManager _weaponManager;
     private ActionState _currentActionState = ActionState.None;
     private float _actionTimer = 0f;
+    private float _castingDuration = 0f; // NEW: Duration for the current cast
+    private bool _allowMovementDuringCast = false; // NEW: Determines if player can move while casting
     public bool IsFacingRight() => _movementController._faceRight;
 
     public override void _Ready()
@@ -55,6 +57,7 @@ public partial class Player : CharacterBody3D
         // Add parameter setters for other locomotion states (e.g., is_dead) here.
 
         // Handle action state timer (upper body animation control)
+        // Handle action state timer (upper body animation control)
         if (_currentActionState != ActionState.None)
         {
             _actionTimer -= (float)delta;
@@ -62,6 +65,13 @@ public partial class Player : CharacterBody3D
             {
                 EndActionState();
             }
+            // NEW: If currently casting, determine movement lock
+            if (_currentActionState == ActionState.Casting)
+            {
+                _movementController.IsMovementLocked = !_allowMovementDuringCast;
+            }
+            // Old logic: "return;" statement has been removed in previous refactor, 
+            // ensuring locomotion updates even during actions if allowed.
         }
 
         // --- Always update locomotion animation blends ---
@@ -120,12 +130,6 @@ public partial class Player : CharacterBody3D
 
     }
 
-    public void TestAnimationEvent()
-    {
-        GD.Print("[Player] !!! TestAnimationEvent CALLED SUCCESFFULLY !!!");
-    }
-
-
     public override void _PhysicsProcess(double delta)
     {
         _movementController.HandleMovement(delta);
@@ -153,6 +157,32 @@ public partial class Player : CharacterBody3D
         GetTree().CreateTimer(lockout).Timeout += OnAttackLockoutEnd;
     }
 
+    public void StartCasting(float duration, bool allowMovement, string castingAnimationName = "Casting")
+    {
+        GD.Print($"[Player] StartCasting called. Duration: {duration}, AllowMovement: {allowMovement}, Animation: {castingAnimationName}");
+        _currentActionState = ActionState.Casting;
+        _castingDuration = duration;
+        _actionTimer = duration; // Use action timer for casting duration
+        _allowMovementDuringCast = allowMovement;
+
+        // Set movement lock based on card property
+        _movementController.IsMovementLocked = !_allowMovementDuringCast;
+
+        // Play casting animation
+        PlayerAnimationTree.ActionAnimationState actionAnimState;
+        if (Enum.TryParse(castingAnimationName, out actionAnimState))
+        {
+            playerAnimationTree.ChangeActionState(actionAnimState);
+            GD.Print($"[Player] StartCasting: Parsed animation '{castingAnimationName}' to {actionAnimState}. Calling ChangeActionState.");
+        }
+        else
+        {
+            GD.PushWarning($"[Player] StartCasting: Could not parse animation '{castingAnimationName}' to ActionAnimationState. Falling back to Casting animation.");
+            playerAnimationTree.ChangeActionState(PlayerAnimationTree.ActionAnimationState.Casting); // Fallback
+        }
+        // No explicit timer for EndCasting here, _Process will call EndActionState when _actionTimer runs out
+    }
+
 
     private void OnAttackLockoutEnd()
     {
@@ -166,11 +196,21 @@ public partial class Player : CharacterBody3D
 
     private void EndActionState()
     {
-        GD.Print("[Player] EndActionState called."); // <-- ADD/VERIFY THIS
+        GD.Print("[Player] EndActionState called.");
+        ActionState completedAction = _currentActionState; // Store current action before resetting
         _currentActionState = ActionState.None;
         _movementController.IsMovementLocked = false;
         playerAnimationTree.ChangeActionState(PlayerAnimationTree.ActionAnimationState.None); // Reset upper body animation to idle
-        GD.Print("[Player] EndActionState: IsMovementLocked=false, ActionState=None, ChangeActionState(None) called."); // <-- ADD/VERIFY THIS
+        GD.Print("[Player] EndActionState: IsMovementLocked=false, ActionState=None, ChangeActionState(None) called.");
+
+        // NEW: If a cast just finished, trigger the card's effect after casting
+        if (completedAction == ActionState.Casting)
+        {
+            GD.Print("[Player] Casting finished. Triggering card effect.");
+            // Here is where you'd trigger the actual card effect.
+            // You'll need to pass the relevant card data to StartCasting and store it.
+            // For now, this is a placeholder for where that logic will go.
+        }
     }
 
   private void OnAttack()
@@ -290,21 +330,21 @@ public partial class Player : CharacterBody3D
         {
             GD.Print($"Player: Triggering card attack by name: {attackName}");
             _attackManager.SetAttackByName(attackName);
-            _attackManager.PerformAttack();
-            
-            var attack = _attackManager.GetCurrentAttack();
-            if (attack != null)
+            var attack = _attackManager.GetCurrentAttack(); // Get attack data for duration/movement lock
+
+            if (_currentActionState == ActionState.None && attack != null)
             {
-                PlayerAnimationTree.ActionAnimationState actionAnimState;
-                if (Enum.TryParse(attack.Animation, out actionAnimState))
-                {
-                    playerAnimationTree.ChangeActionState(actionAnimState);
-                }
-                else
-                {
-                    GD.PushWarning($"Could not find ActionAnimationState for: {attack.Animation}. Falling back to Attack animation.");
-                    playerAnimationTree.ChangeActionState(PlayerAnimationTree.ActionAnimationState.Attack); // Fallback
-                }
+                // *** NEW: Start casting instead of directly performing attack ***
+                // For now, use attack.Duration and attack.AllowMovement as placeholders
+                StartCasting(attack.Duration, attack.AllowMovement, "Casting"); // "Casting" is the default animation for now
+                
+                // If it's an instant melee attack that doesn't need casting,
+                // you might still call _attackManager.PerformAttack() and spawn hitbox here.
+                // For now, we assume cards initiate a cast.
+            }
+            else
+            {
+                GD.Print($"Player: Cannot start card attack, current action state: {_currentActionState}");
             }
         }
     }
@@ -315,21 +355,20 @@ public partial class Player : CharacterBody3D
         {
             GD.Print($"Player: Triggering card attack by ID: {attackId}");
             _attackManager.SetAttackById(attackId);
-            _attackManager.PerformAttack();
+            var attack = _attackManager.GetCurrentAttack(); // Get attack data for duration/movement lock
 
-            var attack = _attackManager.GetCurrentAttack();
-            if (attack != null)
+            if (_currentActionState == ActionState.None && attack != null)
             {
-                PlayerAnimationTree.ActionAnimationState actionAnimState;
-                if (Enum.TryParse(attack.Animation, out actionAnimState))
-                {
-                    playerAnimationTree.ChangeActionState(actionAnimState);
-                }
-                else
-                {
-                    GD.PushWarning($"Could not find ActionAnimationState for: {attack.Animation}. Falling back to Attack animation.");
-                    playerAnimationTree.ChangeActionState(PlayerAnimationTree.ActionAnimationState.Attack); // Fallback
-                }
+                // *** NEW: Start casting instead of directly performing attack ***
+                StartCasting(attack.Duration, attack.AllowMovement, "Casting"); // "Casting" is the default animation for now
+
+                // If it's an instant melee attack that doesn't need casting,
+                // you might still call _attackManager.PerformAttack() and spawn hitbox here.
+                // For now, we assume cards initiate a cast.
+            }
+            else
+            {
+                GD.Print($"Player: Cannot start card attack, current action state: {_currentActionState}");
             }
         }
     }
